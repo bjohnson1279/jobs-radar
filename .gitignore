@@ -147,3 +147,16 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Personal search history and application records
+/data/
+
+# Private profiles, notes, credentials, and imported documents
+/settings.json
+*.local.json
+*.local.md
+.env
+.env.*
+!.env.example
+*.docx
+*.pdf

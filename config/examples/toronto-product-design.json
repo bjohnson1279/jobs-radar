@@ -1,0 +1,108 @@
+{
+  "profile": {
+    "name": "Toronto product design",
+    "description": "Product design opportunities around Toronto and eligible remote roles."
+  },
+  "location": {
+    "label": "Toronto area",
+    "proximityLabel": "Toronto proximity",
+    "includeLocal": true,
+    "includeRemote": true,
+    "localPattern": "\\btoronto\\b|\\bmississauga\\b|\\bmarkham\\b|\\bgta\\b",
+    "excludedLocalPattern": "\\busa\\b|\\bunited states\\b",
+    "remotePattern": "\\bremote\\b|\\bworldwide\\b|\\banywhere\\b",
+    "restrictedRemotePattern": "\\busa\\b|\\bunited states\\b|\\buk\\b|\\bemea\\b|\\bapac\\b|\\b(?:worldwide|anywhere|global|americas|north america|europe|european union)\\b",
+    "allowUnspecifiedRemote": false,
+    "tiers": [
+      {
+        "label": "Toronto",
+        "pattern": "\\btoronto\\b",
+        "points": 30
+      },
+      {
+        "label": "Nearby",
+        "pattern": "\\bmississauga\\b|\\bmarkham\\b",
+        "points": 20
+      }
+    ],
+    "country": {
+      "name": "Canada",
+      "aliases": [
+        "CA",
+        "CAN",
+        "Canadian"
+      ]
+    },
+    "allowMultiCountryRemote": false
+  },
+  "roles": {
+    "includeTitlePattern": "\\bproduct designer\\b|\\bux designer\\b|\\bdesign manager\\b",
+    "excludeTitlePattern": "\\bintern\\b",
+    "excludedScoringTitlePattern": "\\bintern\\b"
+  },
+  "companies": {
+    "targets": [
+      "Example Design Company"
+    ],
+    "bonus": 20,
+    "aliases": {
+      "Example Design Co": "Example Design Company"
+    },
+    "blocklist": []
+  },
+  "scoring": {
+    "rules": [
+      {
+        "label": "Product design",
+        "pattern": "\\bproduct design(?:er)?\\b",
+        "points": 25,
+        "scope": "content"
+      },
+      {
+        "label": "Figma",
+        "pattern": "\\bfigma\\b",
+        "points": 30,
+        "scope": "content"
+      },
+      {
+        "label": "User research",
+        "pattern": "\\buser research\\b",
+        "points": 20,
+        "scope": "content"
+      },
+      {
+        "label": "People leadership",
+        "pattern": "\\bdesign manager\\b|\\bmanage designers\\b",
+        "points": 15,
+        "scope": "content"
+      },
+      {
+        "label": "Fast-paced environment",
+        "pattern": "\\bfast[ -]*paced\\b",
+        "points": -15,
+        "scope": "content"
+      }
+    ],
+    "maxRawScore": 125
+  },
+  "sources": {
+    "greenhouse": [],
+    "lever": [],
+    "ashby": [],
+    "workday": [],
+    "remoteok": {
+      "enabled": false,
+      "tags": []
+    },
+    "jobicy": {
+      "enabled": true,
+      "tags": [
+        "design"
+      ],
+      "maxPages": 3
+    }
+  },
+  "output": {
+    "limit": 15
+  }
+}

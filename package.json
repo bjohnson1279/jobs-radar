@@ -1,0 +1,29 @@
+{
+  "name": "jobs-radar",
+  "version": "1.0.0",
+  "description": "Configurable ATS job search, ranked listings, and application tracking",
+  "keywords": [
+    "jobs",
+    "resume"
+  ],
+  "license": "ISC",
+  "type": "module",
+  "scripts": {
+    "setup": "node scripts/setup-config.ts",
+    "start": "node src/entrypoints/server.ts",
+    "dev": "node src/entrypoints/server.ts",
+    "search": "node src/entrypoints/cli.ts",
+    "test": "node --import ./tests/setup.ts --test tests/*.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "axios": "^1.20.0"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "typescript": "^7.0.2"
+  }
+}

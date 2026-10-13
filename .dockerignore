@@ -1,0 +1,25 @@
+# Allow only code, generic examples, and tests into the build context.
+**
+!package.json
+!package-lock.json
+!tsconfig.json
+!src/
+!src/**
+!web/
+!web/**
+!scripts/
+!scripts/**
+!config/
+!config/settings.example.json
+!config/examples/
+!config/examples/**
+!tests/
+!tests/**
+!docker/
+!docker/**
+# Defense in depth: private files are excluded even in allowed directories.
+**/*.local.json
+**/*.local.md
+**/.env*
+**/*.docx
+**/*.pdf

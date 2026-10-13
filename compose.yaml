@@ -1,0 +1,24 @@
+services:
+  jobs-radar:
+    image: jobs-radar:local
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      target: runtime
+    init: true
+    ports:
+      - "127.0.0.1:${JOBS_RADAR_PORT:-3100}:3100"
+    environment:
+      JOBS_RADAR_CONFIG: /app/config/settings.local.json
+      JOBS_RADAR_DATA_FILE: /app/data/jobs.json
+    volumes:
+      - type: bind
+        source: ${JOBS_RADAR_CONFIG:-./config/settings.local.json}
+        target: /app/config/settings.local.json
+        read_only: true
+        bind:
+          create_host_path: false
+      - type: bind
+        source: ${JOBS_RADAR_DATA_DIR:-./data}
+        target: /app/data
+    restart: unless-stopped

@@ -1,0 +1,267 @@
+{
+  "profile": {
+    "name": "Example software engineering search",
+    "description": "Software engineering opportunities ranked using your configured preferences."
+  },
+  "location": {
+    "label": "Seattle area",
+    "proximityLabel": "Seattle proximity",
+    "includeLocal": true,
+    "includeRemote": true,
+    "localPattern": "\\bwashington\\b|,\\s*WA\\b",
+    "excludedLocalPattern": ",\\s*(?:AL|AK|AZ|AR|CA|CO|CT|DE|FL|GA|HI|ID|IL|IN|IA|KS|KY|LA|ME|MD|MA|MI|MN|MS|MO|MT|NE|NV|NH|NJ|NM|NY|NC|ND|OH|OK|OR|PA|RI|SC|SD|TN|TX|UT|VT|VA|WV|WI|WY)\\b",
+    "remotePattern": "\\bremote\\b|\\banywhere\\b|\\bworldwide\\b",
+    "restrictedRemotePattern": "\\bm[eé]xico\\b|\\bmonterrey\\b|\\bbrazil\\b|\\bbrasil\\b|s[aã]o paulo|bogot[aá]|\\bargentina\\b|\\bcolombia\\b|\\bchile\\b|\\bperu\\b|\\bindia\\b|\\bbengaluru\\b|\\bpune\\b|\\bchina\\b|\\bcanada\\b|\\bontario\\b|\\buk\\b|\\blondon\\b|\\bgermany\\b|\\bberlin\\b|\\bbulgaria\\b|\\bhungary\\b|\\bpoland\\b|\\bromania\\b|\\baustralia\\b|\\bsingapore\\b|\\bphilippines\\b|\\bemea\\b|\\bapac\\b|\\blatam\\b|\\b(?:worldwide|anywhere|global|americas|north america|europe|european union)\\b",
+    "allowUnspecifiedRemote": false,
+    "tiers": [
+      {
+        "label": "Nearby",
+        "pattern": "\\bseattle\\b|\\bbellevue\\b",
+        "points": 30
+      },
+      {
+        "label": "T2",
+        "pattern": "\\bredmond\\b",
+        "points": 20
+      },
+      {
+        "label": "T3",
+        "pattern": "\\bkirkland\\b",
+        "points": 10
+      },
+      {
+        "label": "T4",
+        "pattern": "\\btacoma\\b",
+        "points": 5
+      }
+    ],
+    "country": {
+      "name": "United States",
+      "aliases": [
+        "US",
+        "USA",
+        "U.S.",
+        "U.S.A.",
+        "United States of America"
+      ]
+    },
+    "allowMultiCountryRemote": false
+  },
+  "roles": {
+    "includeTitlePattern": "\\b(?:software|web|front[ -]?end|back[ -]?end|full[ -]?stack|api|integrations?|applications?|data|node(?:\\.?js)?|typescript|javascript|php|laravel|react|java|python)\\b.*\\b(?:engineer|developer|architect)\\b|\\b(?:swe|sde)\\b|\\b(?:technical|systems?|solutions?) architect\\b|\\b(?:senior|staff|principal|lead) developer\\b",
+    "excludeTitlePattern": "\\bsales\\b|\\baccount executive\\b|\\bmarketing\\b|\\b(?:product|program|project|engineering|software development|it) manager\\b|\\b(?:director|head|vp|vice president)\\b|\\bsupport specialist\\b|\\brecruiter\\b|\\bcustomer care\\b|\\bjunior\\b|\\bintern(?:ship)?\\b|\\bmechanic\\b|\\boperator\\b|\\btechnician\\b|\\bcustomer quality\\b|\\binfosec\\b|\\bcorporate engineering\\b|\\bit &\\b|\\bdevops\\b|\\bsre\\b|\\bml engineer\\b|\\bmachine learning engineer\\b|\\bcloud engineer\\b|\\bsite reliability\\b|\\breact native\\b|\\b(?:ios|android|mobile) developer\\b|\\bcybersecurity\\b|\\bmanager\\b",
+    "excludedScoringTitlePattern": "\\bjunior\\b|\\bintern(?:ship)?\\b|\\bmanager\\b|\\bproduct owner\\b|\\bscrum master\\b|\\bmobile developer\\b"
+  },
+  "companies": {
+    "targets": [
+      "Example Engineering"
+    ],
+    "bonus": 25,
+    "aliases": {
+      "Example Co": "Example Engineering"
+    },
+    "blocklist": [
+      "Example Blocked Company"
+    ]
+  },
+  "scoring": {
+    "rules": [
+      {
+        "label": "Senior role",
+        "pattern": "\\bsenior\\b|\\bsr\\.?\\b",
+        "points": 25,
+        "scope": "title",
+        "group": "seniority"
+      },
+      {
+        "label": "Staff / principal / lead role",
+        "pattern": "\\bstaff\\b|\\bprincipal\\b|\\blead\\b",
+        "points": 10,
+        "scope": "title",
+        "group": "seniority"
+      },
+      {
+        "label": "TypeScript",
+        "pattern": "\\btypescript\\b",
+        "points": 30,
+        "scope": "content"
+      },
+      {
+        "label": "Node.js",
+        "pattern": "\\bnode(?:\\s*\\.\\s*js|js|\\s+js)\\b",
+        "points": 30,
+        "scope": "content"
+      },
+      {
+        "label": "PHP / Laravel",
+        "pattern": "\\bphp\\b|\\blaravel\\b",
+        "points": 30,
+        "scope": "content"
+      },
+      {
+        "label": "AWS",
+        "pattern": "\\baws\\b|amazon web services|\\b(?:lambda|eventbridge|api gateway|cloudfront|aws sam|aws cdk)\\b",
+        "points": 15,
+        "scope": "content"
+      },
+      {
+        "label": "Relational databases",
+        "pattern": "\\bpostgres(?:ql)?\\b|\\bmysql\\b|\\bsql server\\b|\\brelational (?:schema|database)\\b",
+        "points": 10,
+        "scope": "content"
+      },
+      {
+        "label": "Messaging",
+        "pattern": "\\bkafka\\b|\\bsqs\\b|\\bmessage queues?\\b|\\bpub\\/sub\\b",
+        "points": 10,
+        "scope": "content"
+      },
+      {
+        "label": "Backend",
+        "pattern": "\\bback[ -]?end\\b",
+        "points": 15,
+        "scope": "content"
+      },
+      {
+        "label": "Distributed architecture",
+        "pattern": "\\bdistributed systems\\b|\\bmicroservices\\b|\\bevent[ -]driven\\b",
+        "points": 20,
+        "scope": "content"
+      },
+      {
+        "label": "Domain design",
+        "pattern": "\\bdomain[ -]driven design\\b|\\bddd\\b|\\bdomain (?:models?|boundaries)\\b|\\bidempotency\\b|\\bstate[ -]machines?\\b|\\btransactional invariants?\\b",
+        "points": 15,
+        "scope": "content"
+      },
+      {
+        "label": "API design",
+        "pattern": "\\brest(?:ful)? apis?\\b|\\bapi (?:design|integrations?)\\b|\\bgraphql\\b|\\bsoap\\b",
+        "points": 15,
+        "scope": "content"
+      },
+      {
+        "label": "C# / .NET mismatch",
+        "pattern": "\\bc\\s*#|(?:^|[^\\w])(?:asp\\s*\\.?\\s*net|\\.net|dotnet)\\b",
+        "points": -40,
+        "scope": "content"
+      },
+      {
+        "label": "Ruby / Rails mismatch",
+        "pattern": "\\bruby\\b|\\brails\\b",
+        "points": -40,
+        "scope": "content"
+      },
+      {
+        "label": "Python / Django mismatch",
+        "pattern": "\\bdjango\\b",
+        "points": -25,
+        "scope": "content"
+      },
+      {
+        "label": "Primary Java / Spring requirements",
+        "pattern": "\\bjava required\\b|\\b(?:must|required|mandatory)\\b[^.!?\\n]{0,60}\\b(?:java|spring boot)\\b|\\b(?:java|spring boot)\\b[^.!?\\n]{0,60}\\b(?:required|mandatory|expertise)\\b",
+        "points": -25,
+        "scope": "content"
+      },
+      {
+        "label": "Go mismatch",
+        "pattern": "\\bgolang\\b|\\bgo required\\b",
+        "points": -25,
+        "scope": "content"
+      },
+      {
+        "label": "Fast-paced environment",
+        "pattern": "\\bfast[\\s–—-]*paced\\b|\\brapid[\\s-]*paced\\b|\\bhigh[\\s-]*pressure\\b",
+        "points": -25,
+        "scope": "content"
+      },
+      {
+        "label": "Many hats",
+        "pattern": "\\b(?:wear|wearing)\\s+(?:many|multiple|several|different)\\s+hats\\b",
+        "points": -25,
+        "scope": "content"
+      },
+      {
+        "label": "Project management duties",
+        "pattern": "\\bproject manag(?:ement|er)\\b|\\b(?:manage|managing|own|owning)\\s+(?:project\\s+)?(?:timelines|budgets|schedules)\\b|\\bscrum master\\b|\\bproduct owner\\b",
+        "points": -25,
+        "scope": "content"
+      },
+      {
+        "label": "Backend / full-stack title",
+        "pattern": "\\bback[ -]?end\\b|\\bfull[ -]?stack\\b",
+        "points": 15,
+        "scope": "title"
+      },
+      {
+        "label": "React / Angular web applications",
+        "pattern": "\\breact\\b(?!\\s+native)|\\bangular\\b",
+        "points": 5,
+        "scope": "content"
+      },
+      {
+        "label": "Legacy modernization",
+        "pattern": "\\blegacy\\b|\\bmoderniz(?:e|ing|ation)\\b|\\bmonolith(?:ic)?\\b|\\bstrangler\\b",
+        "points": 20,
+        "scope": "content"
+      },
+      {
+        "label": "TDD / automated verification",
+        "pattern": "\\btdd\\b|\\btest[ -]driven\\b|\\b(?:contract|integration|automated) tests?\\b|\\btest harness\\b|\\bverification suites?\\b",
+        "points": 15,
+        "scope": "content"
+      },
+      {
+        "label": "Frontend-focused role",
+        "pattern": "\\bfront[ -]?end\\b",
+        "points": -15,
+        "scope": "title"
+      },
+      {
+        "label": "Dedicated data engineering role",
+        "pattern": "\\bdata engineer\\b",
+        "points": -15,
+        "scope": "title"
+      },
+      {
+        "label": "Primary Java role",
+        "pattern": "\\bjava\\b|\\bspring\\b",
+        "points": -25,
+        "scope": "title",
+        "group": "primary-stack"
+      }
+    ],
+    "maxRawScore": 200
+  },
+  "sources": {
+    "greenhouse": [],
+    "lever": [],
+    "ashby": [],
+    "workday": [],
+    "remoteok": {
+      "enabled": true,
+      "tags": [
+        "nodejs",
+        "typescript",
+        "backend",
+        "aws",
+        "php"
+      ]
+    },
+    "jobicy": {
+      "enabled": true,
+      "tags": [
+        "nodejs",
+        "typescript",
+        "backend",
+        "aws",
+        "php"
+      ],
+      "maxPages": 3
+    }
+  },
+  "output": {
+    "limit": 15
+  }
+}

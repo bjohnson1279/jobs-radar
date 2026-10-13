@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Jobs Radar</title><link rel="stylesheet" href="/style.css"><script src="/app.js" defer></script></head>
+<body><main>
+<header><div><p class="eyebrow">YOUR NEXT CHAPTER</p><h1>Jobs Radar</h1><p id="profile-description">Jobs ranked around your priorities.</p></div><button id="refresh">Search job boards</button></header>
+<section class="toolbar" aria-label="Filter listings"><label>Search listings<input id="query" type="search" placeholder="Company, title, or stack"></label><label>Location<select id="location"><option value="all">Local + remote</option><option value="local">Local</option><option value="remote">Remote outside local area</option></select></label><label>Applications<select id="applications"><option value="unapplied">Not applied · latest search</option><option value="applied">Applied · all history</option><option value="all">All history</option></select></label></section>
+<p id="status" role="status" aria-live="polite">No search yet. Search job boards to load current listings.</p>
+<div id="jobs"></div>
+<footer>Scores reflect matched wording, including optional skills and boilerplate. Workday listings currently lack descriptions. Listing history and application records are saved locally. Missing from a search does not mean a job is closed.</footer>
+</main></body></html>
