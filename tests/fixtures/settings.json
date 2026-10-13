@@ -50,7 +50,8 @@
   "roles": {
     "includeTitlePattern": "\\b(?:software|web|front[ -]?end|back[ -]?end|full[ -]?stack|api|integrations?|applications?|data|node(?:\\.?js)?|typescript|javascript|php|laravel|react|java|python)\\b.*\\b(?:engineer|developer|architect)\\b|\\b(?:swe|sde)\\b|\\b(?:technical|systems?|solutions?) architect\\b|\\b(?:senior|staff|principal|lead) developer\\b",
     "excludeTitlePattern": "\\bsales\\b|\\baccount executive\\b|\\bmarketing\\b|\\b(?:product|program|project|engineering|software development|it) manager\\b|\\b(?:director|head|vp|vice president)\\b|\\bsupport specialist\\b|\\brecruiter\\b|\\bcustomer care\\b|\\bjunior\\b|\\bintern(?:ship)?\\b|\\bmechanic\\b|\\boperator\\b|\\btechnician\\b|\\bcustomer quality\\b|\\binfosec\\b|\\bcorporate engineering\\b|\\bit &\\b|\\bdevops\\b|\\bsre\\b|\\bml engineer\\b|\\bmachine learning engineer\\b|\\bcloud engineer\\b|\\bsite reliability\\b|\\breact native\\b|\\b(?:ios|android|mobile) developer\\b|\\bcybersecurity\\b|\\bmanager\\b",
-    "excludedScoringTitlePattern": "\\bjunior\\b|\\bintern(?:ship)?\\b|\\bmanager\\b|\\bproduct owner\\b|\\bscrum master\\b|\\bmobile developer\\b"
+    "excludedScoringTitlePattern": "\\bjunior\\b|\\bintern(?:ship)?\\b|\\bmanager\\b|\\bproduct owner\\b|\\bscrum master\\b|\\bmobile developer\\b",
+    "excludeTitleStackPattern": "\\bkotlin\\b|\\bjava\\b|\\bspring\\b|\\bscala\\b|\\bruby\\b|\\brails\\b|\\bpython\\b|\\bdjango\\b|\\bgolang\\b|\\bgo\\b|\\brust\\b|\\bswift\\b|\\bobjective[ -]?c\\b|\\bdart\\b|\\bflutter\\b|\\belixir\\b|\\berlang\\b|\\bhaskell\\b|\\bclojure\\b|\\bc\\+\\+|\\bc#|(?<!\\w)\\.net\\b|\\b(?:asp|vb)\\.net\\b"
   },
   "companies": {
     "targets": [

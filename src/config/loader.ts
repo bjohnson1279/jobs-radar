@@ -14,7 +14,7 @@ export interface SearchConfig {
         restrictedRemotePattern: string; allowUnspecifiedRemote: boolean;
         tiers: PatternRule[];
     };
-    roles: { includeTitlePattern: string; excludeTitlePattern: string; excludedScoringTitlePattern: string };
+    roles: { includeTitlePattern: string; excludeTitlePattern: string; excludedScoringTitlePattern: string; excludeTitleStackPattern?: string };
     companies: { targets: string[]; bonus: number; aliases: Record<string, string>; blocklist: string[] };
     scoring: { maxRawScore: number; rules: Array<PatternRule & { scope: 'title' | 'content'; group?: string }> };
     sources: {
@@ -42,7 +42,7 @@ const shape: Shape = {
         restrictedRemotePattern: 'pattern', allowUnspecifiedRemote: 'boolean',
         tiers: [{ ...ruleShape, points: 'bonus' }],
     },
-    roles: { includeTitlePattern: 'pattern', excludeTitlePattern: 'pattern', excludedScoringTitlePattern: 'pattern' },
+    roles: { includeTitlePattern: 'pattern', excludeTitlePattern: 'pattern', excludedScoringTitlePattern: 'pattern', excludeTitleStackPattern: 'optionalPattern' },
     companies: { targets: ['nonempty'], bonus: 'bonus', aliases: 'aliases', blocklist: ['nonempty'] },
     scoring: { maxRawScore: 'limit', rules: [{ ...ruleShape, scope: 'scope', group: 'optionalString' }] },
     sources: {
@@ -78,11 +78,11 @@ export function validateConfig(value: unknown): SearchConfig {
             const max = schema === 'pages' ? 100 : schema === 'limit' ? 10000 : 1000;
             if (typeof value !== 'number' || !Number.isInteger(value) || value < min || value > max) fail(`expected an integer from ${min} to ${max}`);
         } else {
-            if (schema === 'optionalString' && value === undefined) return;
+            if ((schema === 'optionalString' || schema === 'optionalPattern') && value === undefined) return;
             if (typeof value !== 'string') return fail('expected a string');
             if (schema === 'nonempty' && !value.trim()) fail('must not be empty');
             if (schema === 'scope' && value !== 'title' && value !== 'content') fail('expected title or content');
-            if (schema === 'pattern') try { compilePattern(value); } catch { fail('invalid regular expression'); }
+            if (schema === 'pattern' || schema === 'optionalPattern') try { compilePattern(value); } catch { fail('invalid regular expression'); }
         }
     }
     check(value, shape, 'config');

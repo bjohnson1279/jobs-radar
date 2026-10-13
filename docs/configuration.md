@@ -16,7 +16,7 @@ All preferences live in a JSON file. Native startup uses `JOBS_RADAR_CONFIG` whe
 
 Patterns are case-insensitive regular expressions inside JSON strings. Escape backslashes twice, for example `"\\bpython\\b|\\bdjango\\b"`. An empty pattern disables matching. An empty `roles.includeTitlePattern` allows all titles; empty exclusion patterns exclude none.
 
-`excludeTitlePattern` omits listings entirely. `excludedScoringTitlePattern` keeps an otherwise eligible listing but assigns zero fit. The example profile is only a starting point; change both filters to suit your profession and level.
+`excludeTitlePattern` omits listings entirely. `excludedScoringTitlePattern` keeps an otherwise eligible listing but assigns zero fit. `excludeTitleStackPattern` is an optional hard exclusion for technologies explicitly named in a title, such as Kotlin or .NET. It applies to new searches and saved results before scoring, even if the title also names a preferred stack. Description-only mentions still use scoring rules. Leave it empty to disable it or remove a technology when it is relevant to your profile. The example profile is only a starting point; change both filters to suit your profession and level.
 
 ## Country and location
 
