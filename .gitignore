@@ -147,3 +147,16 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Sensitive security credentials & key files
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.keystore
+id_rsa*
+id_ed25519*
+credentials.json
+secrets.json
+secrets.yml
