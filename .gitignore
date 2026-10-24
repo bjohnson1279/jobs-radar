@@ -160,8 +160,13 @@ vite.config.ts.timestamp-*
 *.keystore
 id_rsa*
 id_ed25519*
+id_ecdsa*
+id_dsa*
 credentials.json
 secrets.json
 secrets.yml
 *.service-account.json
 service-account*.json
+.npmrc
+.aws/
+.kube/
