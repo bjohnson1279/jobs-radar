@@ -158,6 +158,11 @@ vite.config.ts.timestamp-*
 *.pfx
 *.crt
 *.keystore
+*.jks
+*.asc
+.netrc
+.pgpass
+.dockercfg
 id_rsa*
 id_ed25519*
 id_ecdsa*
