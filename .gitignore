@@ -68,6 +68,8 @@ web_modules/
 # dotenv environment variable files
 .env
 .env.*
+.env.local
+.env.*.local
 !.env.example
 
 # parcel-bundler cache (https://parceljs.org/)
@@ -160,3 +162,29 @@ vite.config.ts.timestamp-*
 !.env.example
 *.docx
 *.pdf
+
+# Sensitive security credentials & key files
+*.pem
+*.key
+*.p8
+*.p12
+*.pfx
+*.crt
+*.keystore
+*.jks
+*.asc
+.netrc
+.pgpass
+.dockercfg
+id_rsa*
+id_ed25519*
+id_ecdsa*
+id_dsa*
+credentials.json
+secrets.json
+secrets.yml
+*.service-account.json
+service-account*.json
+.npmrc
+.aws/
+.kube/

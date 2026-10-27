@@ -38,7 +38,8 @@
   "roles": {
     "includeTitlePattern": "\\bproduct designer\\b|\\bux designer\\b|\\bdesign manager\\b",
     "excludeTitlePattern": "\\bintern\\b",
-    "excludedScoringTitlePattern": "\\bintern\\b"
+    "excludedScoringTitlePattern": "\\bintern\\b",
+    "excludeTitleStackPattern": ""
   },
   "companies": {
     "targets": [

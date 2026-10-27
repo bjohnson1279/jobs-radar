@@ -136,3 +136,9 @@ The ignore rules do not remove files that were already committed; inspect the st
 ## Limitations
 
 Provider errors currently skip the source, and aggregator discovery windows may omit older listings. Workday currently scores only title/location information. Titles and descriptions are matched with configurable patterns, including optional skills and boilerplate; scores are heuristic fit indicators, not hiring probabilities. Source country/location text can be ambiguous, so strict filters can omit otherwise suitable roles. Board slugs and current source availability are not validated at startup.
+
+## Security Policy & Vulnerability Reporting
+
+Security is a top priority. Please review our [Security Policy](SECURITY.md) for details on how to responsibly disclose vulnerabilities.
+
+> ⚠️ **DO NOT open public GitHub issues for security vulnerabilities.** Follow the private reporting process outlined in [SECURITY.md](SECURITY.md).
