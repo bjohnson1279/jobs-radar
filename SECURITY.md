@@ -12,7 +12,10 @@ We take the security of our project seriously. If you believe you have found a s
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 
-Instead, please report vulnerabilities directly to the repository maintainers or via private security advisories.
+Instead, please report vulnerabilities using one of the following private methods:
+
+- **GitHub Private Vulnerability Reporting:** Go to the **Security** tab of this repository and click **Report a vulnerability**.
+- **Email:** Contact the security team directly at `security@example.com`.
 
 ### What to include in your report:
 - A description of the issue and its potential impact.
