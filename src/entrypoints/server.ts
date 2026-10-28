@@ -14,8 +14,11 @@ const assets: Record<string, [string, string]> = {
     '/': ['index.html', 'text/html'], '/app.js': ['app.js', 'text/javascript'], '/style.css': ['style.css', 'text/css'],
 };
 
-const server = createServer(async (req, res) => {
+export const server = createServer(async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
     res.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'");
     const url = new URL(req.url ?? '/', 'http://localhost');
     const json = (status: number, data: unknown) => {
@@ -68,15 +71,15 @@ let port = Number(process.env.PORT ?? 3100);
 if (!Number.isInteger(port) || port < 1 || port > 65535) {
     throw new Error('PORT must be an integer between 1 and 65535');
 }
+const host = process.env.HOST ?? '127.0.0.1';
 server.on('error', (error: NodeJS.ErrnoException) => {
     if (error.code === 'EADDRINUSE' && !process.env.PORT && port < 3200) {
         port += 1;
-        server.listen(port, '127.0.0.1');
+        server.listen(port, host);
     } else {
         console.error(`Unable to start Jobs Radar on port ${port}: ${error.message}`);
         process.exitCode = 1;
     }
 });
-const host = process.env.HOST ?? '127.0.0.1';
 server.on('listening', () => console.log(`Jobs Radar: http://${host}:${port}`));
 server.listen(port, host);
