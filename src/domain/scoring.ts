@@ -3,9 +3,17 @@ import { compilePattern, settings, type SearchConfig } from '../config/loader.ts
 const normalizeCompany = (name: string) => name.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
 
 export function plainText(text: string): string {
-    return text.replace(/<[^>]*>/g, ' ').replace(/&(?:nbsp|#160);/gi, ' ')
-        .replace(/&amp;/gi, '&').replace(/&#(?:35|x23);/gi, '#')
-        .replace(/&(?:ndash|mdash);|&#(?:8211|8212);/gi, '-').replace(/\s+/g, ' ');
+    let s = text;
+    // Skip expensive HTML entity and tag regex replacements if no tags or entities exist
+    if (s.includes('<') || s.includes('&')) {
+        s = s.replace(/<[^>]*>/g, ' ').replace(/&(?:nbsp|#160);/gi, ' ')
+            .replace(/&amp;/gi, '&').replace(/&#(?:35|x23);/gi, '#')
+            .replace(/&(?:ndash|mdash);|&#(?:8211|8212);/gi, '-');
+    }
+    if (/\s{2,}|[\r\n\t\v\f]/.test(s)) {
+        s = s.replace(/\s+/g, ' ');
+    }
+    return s;
 }
 
 export function createScorer(config: SearchConfig) {

@@ -13,13 +13,14 @@ export function createRanker(config: SearchConfig) {
         .map(job => {
             // Reclassify saved listings so new preferences apply without deleting history.
             const location = parseLocation(`${job.location}${job.remoteHint || job.isRemote ? ' Remote' : ''}`, job.title, job.country);
+            const cleanDescription = plainText(job.description);
             return {
                 ...job,
                 isLocal: location.isLocal,
                 isRemote: location.isRemoteEligible,
                 locationScore: location.locationScore,
-                description: plainText(job.description),
-                ...scoreJobDetails(job.description, job.title, location.locationScore, companyBonusFor(job.company)),
+                description: cleanDescription,
+                ...scoreJobDetails(cleanDescription, job.title, location.locationScore, companyBonusFor(job.company)),
             };
         })
         .filter(job => (config.location.includeLocal && job.isLocal) || (config.location.includeRemote && job.isRemote))

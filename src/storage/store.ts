@@ -42,15 +42,20 @@ export async function openStore(path: string) {
         snapshot: () => structuredClone(state),
         recordSearch: (jobs: JobPosting[], now = new Date().toISOString()) => mutate(next => {
             next.jobs.forEach(job => { job.inLatestSearch = false; });
+            // Build a map of saved jobs to reduce lookups from O(N^2) to O(N)
+            const jobMap = new Map(next.jobs.map(saved => [saved.id, saved]));
             for (const job of jobs) {
-                const previous = next.jobs.find(saved => saved.id === job.id);
+                const previous = jobMap.get(job.id);
                 const tracked: TrackedJob = {
                     ...job, postedAt: job.postedAt ?? previous?.postedAt ?? null,
                     firstSeenAt: previous?.firstSeenAt ?? now, lastSeenAt: now,
                     appliedAt: previous?.appliedAt ?? null, inLatestSearch: true,
                 };
                 if (previous) Object.assign(previous, tracked);
-                else next.jobs.push(tracked);
+                else {
+                    next.jobs.push(tracked);
+                    jobMap.set(job.id, tracked);
+                }
             }
             next.updatedAt = now;
         }),

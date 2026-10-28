@@ -11,15 +11,31 @@ export function createLocationMatcher(config: SearchConfig) {
     const tiers = preferences.tiers.map(tier => ({ ...tier, regex: compilePattern(tier.pattern) }));
     const locationScoreFor = (location: string) => {
         if (excludedLocal.test(location) && !local.test(location)) return 0;
-        return Math.max(0, ...tiers.filter(tier => tier.regex.test(location)).map(tier => tier.points));
+        // Avoid allocating intermediate arrays with a single loop finding max points
+        let maxPoints = 0;
+        for (const tier of tiers) {
+            if (tier.points > maxPoints && tier.regex.test(location)) {
+                maxPoints = tier.points;
+            }
+        }
+        return maxPoints;
     };
     const parseLocation = (location: string, title = '', sourceCountry = '') => {
         const combined = `${location} ${title}`;
-        const locationScore = locationScoreFor(location);
+        let locationScore = 0;
+        let hasTierMatch = false;
+        if (!excludedLocal.test(location) || local.test(location)) {
+            for (const tier of tiers) {
+                if (tier.regex.test(location)) {
+                    hasTierMatch = true;
+                    if (tier.points > locationScore) locationScore = tier.points;
+                }
+            }
+        }
         // Country evidence comes from location/structured metadata, never the title.
         const geography = `${location} ${sourceCountry}`;
         const foreign = country.foreign(geography) || restrictedRemote.test(country.withoutTarget(geography));
-        const isLocal = !foreign && (local.test(location) || (tiers.some(tier => tier.regex.test(location)) && !excludedLocal.test(location)));
+        const isLocal = !foreign && (local.test(location) || (hasTierMatch && !excludedLocal.test(location)));
         const explicitlyEligible = country.matches(geography);
         const eligible = explicitlyEligible || (!foreign && (isLocal || preferences.allowUnspecifiedRemote));
         return {
