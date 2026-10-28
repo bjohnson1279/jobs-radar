@@ -44,6 +44,7 @@ function render() {
         const info = element('div');
         info.append(element('h2', job.title), element('p', `${job.company} · ${job.location || 'Location unspecified'}`, 'meta'));
         const score = element('div', undefined, 'score');
+        score.setAttribute('aria-label', `Fit score: ${job.score} out of 100`);
         score.append(element('strong', String(job.score)), element('small', 'FIT / 100'));
         score.title = 'Weighted fit normalized to 0–100. Rounded ties retain the underlying ranking.';
         const dates = element('p', job.postedAt ? ageLabel(job.postedAt, job.postedDateKind === 'lastPublished' ? 'Last published' : 'Posted') : `${ageLabel(job.firstSeenAt, 'First seen')} · Posting date unknown`, 'meta');
@@ -58,9 +59,12 @@ function render() {
         const localToday = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         dateInput.max = localToday;
         dateInput.value = job.appliedAt ? new Date(job.appliedAt).toLocaleDateString('en-CA') : localToday;
+        dateInput.setAttribute('aria-label', `Application date for ${job.title} at ${job.company}`);
         dateLabel.append(dateInput); actions.append(dateLabel);
         const save = element('button', job.appliedAt ? 'Update application date' : 'Mark as applied');
+        save.setAttribute('aria-label', `${job.appliedAt ? 'Update application date' : 'Mark as applied'} for ${job.title} at ${job.company}`);
         const undo = element('button', 'Undo applied');
+        undo.setAttribute('aria-label', `Undo applied status for ${job.title} at ${job.company}`);
         async function update(applied) {
             save.disabled = true; undo.disabled = true;
             try {
@@ -96,6 +100,7 @@ function render() {
             if (['https:', 'http:'].includes(url.protocol)) {
                 const link = element('a', 'View original listing ↗');
                 link.href = url.href; link.target = '_blank'; link.rel = 'noopener noreferrer';
+                link.setAttribute('aria-label', `View original listing for ${job.title} at ${job.company} (opens in new tab)`);
                 const paragraph = element('p'); paragraph.append(link); card.append(paragraph);
             }
         } catch { /* Invalid listing URLs are omitted. */ }
