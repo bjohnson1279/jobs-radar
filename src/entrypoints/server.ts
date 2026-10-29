@@ -44,8 +44,8 @@ export const server = createServer(async (req, res) => {
             if (req.headers['x-jobs-radar'] !== 'application') { json(403, { error: 'Invalid application request' }); return; }
             let body = '';
             for await (const chunk of req) {
+                if (body.length + chunk.length > 4096) { json(413, { error: 'Request too large' }); return; }
                 body += chunk.toString();
-                if (body.length > 4096) { json(413, { error: 'Request too large' }); return; }
             }
             let input;
             try { input = JSON.parse(body); } catch { json(400, { error: 'Invalid JSON' }); return; }
@@ -59,7 +59,7 @@ export const server = createServer(async (req, res) => {
             if (!store.snapshot().jobs.some(job => job.id === input.id)) { json(404, { error: 'Unknown job' }); return; }
             await store.setApplied(input.id, appliedAt);
             json(200, { saved: true });
-        } else if (req.method === 'GET' && assets[url.pathname]) {
+        } else if (req.method === 'GET' && Object.hasOwn(assets, url.pathname)) {
             const [file, type] = assets[url.pathname];
             const body = await readFile(new URL(`../../web/${file}`, import.meta.url));
             res.writeHead(200, { 'Content-Type': `${type}; charset=utf-8` }); res.end(body);
