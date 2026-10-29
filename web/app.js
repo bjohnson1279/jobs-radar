@@ -33,6 +33,7 @@ function render() {
         && (locationFilter.value === 'all' || (locationFilter.value === 'local' ? job.isLocal : job.isRemote && (!state.profile?.includeLocal || !job.isLocal))));
     results.replaceChildren();
     refresh.disabled = state.refreshing;
+    refresh.setAttribute('aria-busy', state.refreshing ? 'true' : 'false');
     refresh.textContent = state.refreshing ? 'Searching…' : 'Search job boards';
     status.textContent = state.error || (state.refreshing ? 'Searching job boards. This can take a few minutes…'
         : state.updatedAt ? `${jobs.length} matches · Highest score first · Updated ${new Date(state.updatedAt).toLocaleString()}`
@@ -53,8 +54,11 @@ function render() {
         if (job.appliedAt) info.append(element('p', `Applied ${new Date(job.appliedAt).toLocaleString()}`, 'applied'));
         heading.append(info, score); card.append(heading);
         const actions = element('div', undefined, 'application-actions');
+        const inputId = `app-date-${job.id}`;
         const dateLabel = element('label', 'Application date');
+        dateLabel.setAttribute('for', inputId);
         const dateInput = element('input'); dateInput.type = 'date';
+        dateInput.id = inputId;
         const today = new Date();
         const localToday = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         dateInput.max = localToday;
