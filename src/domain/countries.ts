@@ -24,9 +24,11 @@ export function createCountryMatcher(country: { name: string; aliases: string[] 
     const foreign = literalPattern(foreignNames);
     const foreignCodes = [...regions.keys()].filter(code => !targetCodes.has(code));
     const separatedForeignCode = new RegExp(`(?:[/;|&]|\\b(?:and|or)\\b)\\s*(?:${foreignCodes.join('|')})(?=$|[^\\p{L}\\p{N}])`, 'iu');
+    // Pre-compile global regex once to avoid recompiling on every withoutTarget invocation
+    const acceptedGlobal = new RegExp(accepted.source, 'giu');
     return {
         matches: (text: string) => accepted.test(text),
         foreign: (text: string) => foreign.test(text) || separatedForeignCode.test(text),
-        withoutTarget: (text: string) => text.replace(new RegExp(accepted.source, 'giu'), ' '),
+        withoutTarget: (text: string) => text.replace(acceptedGlobal, ' '),
     };
 }

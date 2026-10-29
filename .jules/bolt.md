@@ -1,0 +1,5 @@
+# Bolt Performance Journal
+
+## 2025-05-18 - Fast-path check and single-pass cleaning in V8 text processing
+**Learning:** In V8, string replacement callbacks `replace(regex, fn)` incur JS-to-C++ boundary overhead when processing large HTML descriptions. Chained regexes remain faster, but fast-path checking (`includes('<') || includes('&')`) before executing multi-pass entity regexes completely skips redundant scans on clean strings. Furthermore, passing raw HTML to downstream scoring functions causes duplicate full-text cleaning passes.
+**Action:** Always clean strings once at the entry point of pipeline transformations, and add cheap substring pre-checks (`includes`) before running multi-regex string replacement sequences.
