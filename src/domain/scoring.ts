@@ -22,41 +22,75 @@ export function createScorer(config: SearchConfig) {
     const aliases = new Map(Object.entries(config.companies.aliases).map(([alias, target]) => [normalizeCompany(alias), normalizeCompany(target)]));
     const rules = config.scoring.rules.map(rule => ({ ...rule, regex: compilePattern(rule.pattern) }));
     const excludedTitle = compilePattern(config.roles.excludedScoringTitlePattern);
-    const companyBonusFor = (name: string) => {
+    // Cache company normalization and target/blocklist lookups since company names repeat heavily.
+    const companyCache = new Map<string, { bonus: number; blocklisted: boolean }>();
+    const getCompanyInfo = (name: string) => {
+        let cached = companyCache.get(name);
+        if (cached) return cached;
         const key = normalizeCompany(name);
-        return targets.has(key) || targets.has(aliases.get(key) ?? '') ? config.companies.bonus : 0;
+        const bonus = targets.has(key) || targets.has(aliases.get(key) ?? '') ? config.companies.bonus : 0;
+        const blocklisted = blocklist.has(key);
+        cached = { bonus, blocklisted };
+        companyCache.set(name, cached);
+        return cached;
     };
-    const isBlocklisted = (name: string) => blocklist.has(normalizeCompany(name));
-    const scoreJobDetails = (text: string, title: string, locationScore = 0, companyBonus = 0) => {
-        const reasons: string[] = [];
-        const pros: Array<{ label: string; points: number; contribution: number }> = [];
-        const cons: Array<{ label: string; points: number; contribution: number }> = [];
+    const companyBonusFor = (name: string) => getCompanyInfo(name).bonus;
+    const isBlocklisted = (name: string) => getCompanyInfo(name).blocklisted;
+
+    // Single unified scoring engine supporting both fast-path score calculation and detailed breakdown generation.
+    const evaluateScoring = (text: string, title: string, locationScore = 0, companyBonus = 0, includeDetails = false) => {
         if (excludedTitle.test(title)) {
-            return { score: 0, rawScore: 0, reasons: ['Title outside preferred role'], pros, cons: [{ label: 'Title outside preferred role', points: 0, contribution: 0 }] };
+            if (!includeDetails) return { score: 0 };
+            return { score: 0, rawScore: 0, reasons: ['Title outside preferred role'], pros: [], cons: [{ label: 'Title outside preferred role', points: 0, contribution: 0 }] };
         }
         let score = 0;
+        const reasons: string[] = includeDetails ? [] : [];
+        const pros: Array<{ label: string; points: number; contribution: number }> = includeDetails ? [] : [];
+        const cons: Array<{ label: string; points: number; contribution: number }> = includeDetails ? [] : [];
+
         const add = (label: string, points: number) => {
             if (!points) return;
             score += points;
-            const contribution = Number((points * 100 / config.scoring.maxRawScore).toFixed(2));
-            (points > 0 ? pros : cons).push({ label, points, contribution });
-            reasons.push(`${label} ${points > 0 ? '+' : ''}${contribution}`);
+            if (includeDetails) {
+                const contribution = Number((points * 100 / config.scoring.maxRawScore).toFixed(2));
+                (points > 0 ? pros : cons).push({ label, points, contribution });
+                reasons.push(`${label} ${points > 0 ? '+' : ''}${contribution}`);
+            }
         };
+
         add(config.location.proximityLabel, locationScore);
         add('Target company', companyBonus);
         const content = plainText(`${title} ${text}`);
-        const matchedGroups = new Set<string>();
+        // Avoid allocating new Set() per job score call; use lazy string array for group matching.
+        let matchedGroups: string[] | null = null;
         for (const rule of rules) {
-            if (rule.group && matchedGroups.has(rule.group)) continue;
+            if (rule.group && matchedGroups && matchedGroups.includes(rule.group)) continue;
             if (rule.regex.test(rule.scope === 'title' ? title : content)) {
                 add(rule.label, rule.points);
-                if (rule.group) matchedGroups.add(rule.group);
+                if (rule.group) {
+                    if (!matchedGroups) matchedGroups = [rule.group];
+                    else matchedGroups.push(rule.group);
+                }
             }
         }
         const rawScore = Math.max(0, score);
-        return { score: Math.min(100, Math.round(rawScore * 100 / config.scoring.maxRawScore)), rawScore, reasons, pros, cons };
+        const finalScore = Math.min(100, Math.round(rawScore * 100 / config.scoring.maxRawScore));
+        if (!includeDetails) return { score: finalScore };
+        return { score: finalScore, rawScore, reasons, pros, cons };
     };
-    const scoreJob = (text: string, title: string, locationScore = 0, companyBonus = 0) => scoreJobDetails(text, title, locationScore, companyBonus).score;
+
+    const scoreJobDetails = (text: string, title: string, locationScore = 0, companyBonus = 0) =>
+        evaluateScoring(text, title, locationScore, companyBonus, true) as {
+            score: number;
+            rawScore: number;
+            reasons: string[];
+            pros: Array<{ label: string; points: number; contribution: number }>;
+            cons: Array<{ label: string; points: number; contribution: number }>;
+        };
+
+    const scoreJob = (text: string, title: string, locationScore = 0, companyBonus = 0) =>
+        evaluateScoring(text, title, locationScore, companyBonus, false).score;
+
     return { companyBonusFor, isBlocklisted, scoreJobDetails, scoreJob };
 }
 
