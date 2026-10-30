@@ -97,7 +97,9 @@ function render() {
         }
         card.append(criteria);
         const details = element('details');
-        details.append(element('summary', 'Job description'), element('p', job.description || 'Description unavailable from this source.', 'description'));
+        const summary = element('summary', 'Job description');
+        summary.setAttribute('aria-label', `Job description for ${job.title} at ${job.company}`);
+        details.append(summary, element('p', job.description || 'Description unavailable from this source.', 'description'));
         card.append(details);
         try {
             const url = new URL(job.url);
