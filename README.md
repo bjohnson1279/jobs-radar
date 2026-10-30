@@ -73,7 +73,7 @@ docker build --target test -t jobs-radar-test -f docker/Dockerfile .
 
 ## Configuration and profiles
 
-See [configuration reference](docs/configuration.md) for every section, country filtering, regex patterns, scoring, and provider setup. `config/examples/toronto-product-design.json` demonstrates a different location and profession using fictitious company targets.
+See [configuration reference](docs/configuration.md) for every section, country filtering, regex patterns, scoring, and provider setup, and [API reference](docs/api.md) for endpoint details. `config/examples/toronto-product-design.json` demonstrates a different location and profession using fictitious company targets.
 
 You can select an alternate configuration in PowerShell:
 
@@ -115,7 +115,7 @@ src/
 web/                          Browser interface
 scripts/                      Local setup utilities
 tests/                        Offline tests and synthetic fixtures
-docs/                         Configuration documentation
+docs/                         Configuration and API documentation
 docker/                       Multi-stage Dockerfile
 data/                         Personal history and artifacts, ignored
 compose.yaml                  Local container orchestration
