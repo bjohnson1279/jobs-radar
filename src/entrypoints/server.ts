@@ -15,10 +15,13 @@ const assets: Record<string, [string, string]> = {
 };
 
 export const server = createServer(async (req, res) => {
+    // Defense-in-depth HTTP security headers to protect local application data and browser features
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
     res.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'");
     const url = new URL(req.url ?? '/', 'http://localhost');
     const json = (status: number, data: unknown) => {

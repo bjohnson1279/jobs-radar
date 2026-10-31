@@ -20,6 +20,8 @@ test('server includes security headers in HTTP responses', async (t) => {
     assert.equal(headers.get('x-frame-options'), 'DENY');
     assert.equal(headers.get('referrer-policy'), 'strict-origin-when-cross-origin');
     assert.equal(headers.get('cross-origin-opener-policy'), 'same-origin');
+    assert.equal(headers.get('cross-origin-resource-policy'), 'same-origin');
+    assert.equal(headers.get('permissions-policy'), 'camera=(), microphone=(), geolocation=()');
     assert.equal(headers.get('content-security-policy'), "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'");
 
     // Prototype property lookup returns 404 instead of throwing unhandled server error
