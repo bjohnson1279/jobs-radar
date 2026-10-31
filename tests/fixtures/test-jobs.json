@@ -1,5 +1,22 @@
 {
   "version": 1,
-  "updatedAt": null,
-  "jobs": []
+  "updatedAt": "2026-09-01T00:00:00.000Z",
+  "jobs": [
+    {
+      "id": "gh-acme-101",
+      "firstSeenAt": "2026-09-01T00:00:00.000Z",
+      "lastSeenAt": "2026-09-01T00:00:00.000Z",
+      "appliedAt": null,
+      "inLatestSearch": true,
+      "title": "Staff Software Engineer",
+      "company": "ACME",
+      "url": "https://example.com/acme/101",
+      "location": "Seattle, WA",
+      "description": "TypeScript Node.js",
+      "isRemote": true,
+      "isLocal": true,
+      "locationScore": 30,
+      "score": 90
+    }
+  ]
 }

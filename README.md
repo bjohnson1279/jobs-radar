@@ -97,6 +97,10 @@ Publication dates are used when provided. Ashby dates are labeled **Last publish
 
 Preferences can be changed without deleting history. Saved listings are reclassified and rescored on read. CLI searches do not update application history.
 
+## API reference
+
+For details on the HTTP endpoints used by the web interface, request/response formats, security headers, and application state updates, see the [API reference](docs/api.md).
+
 ## Project layout
 
 ```text
@@ -115,7 +119,7 @@ src/
 web/                          Browser interface
 scripts/                      Local setup utilities
 tests/                        Offline tests and synthetic fixtures
-docs/                         Configuration documentation
+docs/                         Configuration and API documentation
 docker/                       Multi-stage Dockerfile
 data/                         Personal history and artifacts, ignored
 compose.yaml                  Local container orchestration

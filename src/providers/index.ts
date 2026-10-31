@@ -12,7 +12,7 @@ const http = axios.create({ timeout: 15_000 });
 export async function scrapeGreenhouse(company: string, companyBonus: number = 0): Promise<JobPosting[]> {
     try {
         const res = await http.get(
-            `https://boards-api.greenhouse.io/v1/boards/${company}/jobs?content=true`
+            `https://boards-api.greenhouse.io/v1/boards/${encodeURIComponent(company)}/jobs?content=true`
         );
         return res.data.jobs
             .filter((job: any) => matchesTitle(job.title))
@@ -41,7 +41,7 @@ export async function scrapeGreenhouse(company: string, companyBonus: number = 0
 
 export async function scrapeLever(company: string, companyBonus: number = 0): Promise<JobPosting[]> {
     try {
-        const res = await http.get(`https://api.lever.co/v0/postings/${company}?mode=json`);
+        const res = await http.get(`https://api.lever.co/v0/postings/${encodeURIComponent(company)}?mode=json`);
         return res.data
             .filter((job: any) => matchesTitle(job.text))
             .map((job: any) => {
@@ -69,7 +69,7 @@ export async function scrapeLever(company: string, companyBonus: number = 0): Pr
 export async function scrapeAshby(company: string, companyBonus: number = 0): Promise<JobPosting[]> {
     try {
         const res = await http.get(
-            `https://api.ashbyhq.com/posting-api/job-board/${company}?includeCompensation=true`
+            `https://api.ashbyhq.com/posting-api/job-board/${encodeURIComponent(company)}?includeCompensation=true`
         );
         return (res.data.jobs || [])
             .filter((job: any) => matchesTitle(job.title))
@@ -84,7 +84,7 @@ export async function scrapeAshby(company: string, companyBonus: number = 0): Pr
                     postedDateKind: 'lastPublished' as const,
                     title: job.title,
                     company: company.toUpperCase(),
-                    url: job.applyUrl || `https://jobs.ashbyhq.com/${company}/${job.id}`,
+                    url: job.applyUrl || `https://jobs.ashbyhq.com/${encodeURIComponent(company)}/${job.id}`,
                     location: loc,
                     description: job.descriptionHtml || '',
                     isRemote: isRemoteEligible,
@@ -101,7 +101,7 @@ export async function scrapeAshby(company: string, companyBonus: number = 0): Pr
 
 export async function scrapeWorkday(board: WorkdayBoard): Promise<JobPosting[]> {
     const base = `https://${board.tenant}.${board.datacenter}.myworkdayjobs.com`;
-    const endpoint = `${base}/wday/cxs/${board.tenant}/${board.site}/jobs`;
+    const endpoint = `${base}/wday/cxs/${encodeURIComponent(board.tenant)}/${encodeURIComponent(board.site)}/jobs`;
     const jobs: JobPosting[] = [];
     const companyBonus = companyBonusFor(board.displayName);
 
@@ -158,7 +158,7 @@ export async function scrapeRemoteOK(): Promise<JobPosting[]> {
 
     for (const tag of TAGS) {
         try {
-            const res = await http.get(`https://remoteok.com/api?tag=${tag}`, {
+            const res = await http.get(`https://remoteok.com/api?tag=${encodeURIComponent(tag)}`, {
                 headers: { 'User-Agent': 'jobs-radar/1.0 (personal job search tool)' },
             });
             // First element is metadata/legal notice, skip it
