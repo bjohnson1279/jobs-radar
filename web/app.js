@@ -46,7 +46,6 @@ function render() {
         info.append(element('h2', job.title), element('p', `${job.company} · ${job.location || 'Location unspecified'}`, 'meta'));
         const score = element('div', undefined, 'score');
         score.setAttribute('aria-label', `Fit score: ${job.score} out of 100`);
-        score.setAttribute('aria-label', `Fit score: ${job.score} out of 100`);
         score.append(element('strong', String(job.score)), element('small', 'FIT / 100'));
         score.title = 'Weighted fit normalized to 0–100. Rounded ties retain the underlying ranking.';
         const dates = element('p', job.postedAt ? ageLabel(job.postedAt, job.postedDateKind === 'lastPublished' ? 'Last published' : 'Posted') : `${ageLabel(job.firstSeenAt, 'First seen')} · Posting date unknown`, 'meta');
@@ -65,16 +64,17 @@ function render() {
         dateInput.max = localToday;
         dateInput.value = job.appliedAt ? new Date(job.appliedAt).toLocaleDateString('en-CA') : localToday;
         dateInput.setAttribute('aria-label', `Application date for ${job.title} at ${job.company}`);
-        dateInput.setAttribute('aria-label', `Application date for ${job.title} at ${job.company}`);
         dateLabel.append(dateInput); actions.append(dateLabel);
         const save = element('button', job.appliedAt ? 'Update application date' : 'Mark as applied');
         save.setAttribute('aria-label', `${job.appliedAt ? 'Update application date' : 'Mark as applied'} for ${job.title} at ${job.company}`);
-        save.setAttribute('aria-label', `${job.appliedAt ? 'Update application date' : 'Mark as applied'} for ${job.title} at ${job.company}`);
         const undo = element('button', 'Undo applied');
         undo.setAttribute('aria-label', `Undo applied status for ${job.title} at ${job.company}`);
-        undo.setAttribute('aria-label', `Undo applied status for ${job.title} at ${job.company}`);
-        async function update(applied) {
+        async function update(applied, triggerBtn) {
             save.disabled = true; undo.disabled = true;
+            if (triggerBtn) {
+                triggerBtn.textContent = 'Saving…';
+                triggerBtn.setAttribute('aria-busy', 'true');
+            }
             try {
                 if (applied && (!dateInput.value || !dateInput.checkValidity())) throw new Error('Choose a valid application date.');
                 const response = await fetch('/api/application', {
@@ -84,10 +84,17 @@ function render() {
                 if (!response.ok) throw new Error((await response.json()).error || 'Could not save application.');
                 await load();
                 status.textContent += applied ? ' · Application saved.' : ' · Applied status removed.';
-            } catch (error) { status.textContent = error.message; save.disabled = false; undo.disabled = false; }
+            } catch (error) {
+                status.textContent = error.message;
+                save.textContent = job.appliedAt ? 'Update application date' : 'Mark as applied';
+                undo.textContent = 'Undo applied';
+                if (triggerBtn) triggerBtn.removeAttribute('aria-busy');
+                save.disabled = false;
+                undo.disabled = false;
+            }
         }
-        save.addEventListener('click', () => update(true));
-        undo.addEventListener('click', () => update(false));
+        save.addEventListener('click', () => update(true, save));
+        undo.addEventListener('click', () => update(false, undo));
         actions.append(save); if (job.appliedAt) actions.append(undo);
         card.append(actions);
         const criteria = element('div', undefined, 'criteria');
@@ -110,7 +117,6 @@ function render() {
             if (['https:', 'http:'].includes(url.protocol)) {
                 const link = element('a', 'View original listing ↗');
                 link.href = url.href; link.target = '_blank'; link.rel = 'noopener noreferrer';
-                link.setAttribute('aria-label', `View original listing for ${job.title} at ${job.company} (opens in new tab)`);
                 link.setAttribute('aria-label', `View original listing for ${job.title} at ${job.company} (opens in new tab)`);
                 const paragraph = element('p'); paragraph.append(link); card.append(paragraph);
             }
