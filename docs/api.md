@@ -216,3 +216,41 @@ Marks a job listing as applied with an application timestamp, updates the applic
 
 #### Practical Usage
 Invoked when marking a job applied, changing an application date, or clicking "Undo applied" on a card in the web interface. Application records persist across future job refreshes and config reloads.
+
+---
+
+### 5. Static Web Assets & Fallback Routes
+
+Serves the client-side single-page interface assets and handles unmapped route fallbacks.
+
+- **Routes**:
+  - `GET /` — Serves `web/index.html` (`Content-Type: text/html; charset=utf-8`)
+  - `GET /app.js` — Serves `web/app.js` (`Content-Type: text/javascript; charset=utf-8`)
+  - `GET /style.css` — Serves `web/style.css` (`Content-Type: text/css; charset=utf-8`)
+- **Headers**: None required
+- **Query Parameters**: None
+- **Request Body**: None
+
+#### Responses
+
+- **Status Code**: `200 OK`
+  Returns the static file contents with the corresponding MIME type and global security headers.
+
+- **Status Code**: `404 Not Found`
+  Returned for any unmapped route or method not matching the API endpoints or static asset routes.
+  ```json
+  {
+    "error": "Not found"
+  }
+  ```
+
+- **Status Code**: `500 Internal Server Error`
+  Returned if an unexpected exception occurs while processing any request.
+  ```json
+  {
+    "error": "Unable to serve request"
+  }
+  ```
+
+#### Practical Usage
+Invoked directly by web browsers navigating to the root application URL or requesting accompanying client stylesheets and scripts. Unmatched routes safely return a standardized JSON 404 response.
