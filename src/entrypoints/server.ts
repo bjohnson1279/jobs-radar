@@ -20,11 +20,20 @@ export const server = createServer(async (req, res) => {
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
     res.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'");
-    const url = new URL(req.url ?? '/', 'http://localhost');
+    // Disable unnecessary browser device access and sensitive permissions
+    res.setHeader('Permissions-Policy', 'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()');
     const json = (status: number, data: unknown) => {
         res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
         res.end(JSON.stringify(data));
     };
+    // Security: Only accept origin-form request targets starting with '/' and validate URL structure
+    let url: URL;
+    try {
+        if (!req.url?.startsWith('/')) { json(400, { error: 'Bad Request' }); return; }
+        url = new URL(req.url, 'http://localhost');
+    } catch {
+        json(400, { error: 'Bad Request' }); return;
+    }
     try {
         if (url.pathname === '/api/health' && req.method === 'GET') {
             json(200, { status: 'ok' });

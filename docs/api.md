@@ -10,6 +10,7 @@ All responses include security headers:
 - `Referrer-Policy: strict-origin-when-cross-origin`
 - `Cross-Origin-Opener-Policy: same-origin`
 - `Content-Security-Policy: default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'`
+- `Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()`
 
 JSON endpoints return `Cache-Control: no-store` and `Content-Type: application/json`.
 
