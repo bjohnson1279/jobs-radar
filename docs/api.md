@@ -216,3 +216,58 @@ Marks a job listing as applied with an application timestamp, updates the applic
 
 #### Practical Usage
 Invoked when marking a job applied, changing an application date, or clicking "Undo applied" on a card in the web interface. Application records persist across future job refreshes and config reloads.
+
+---
+
+### 5. Static Web Assets
+
+Serves the front-end user interface files (HTML, client JavaScript, and CSS stylesheets).
+
+- **Method**: `GET`
+- **Routes**:
+  - `/` (Serves `web/index.html`)
+  - `/app.js` (Serves `web/app.js`)
+  - `/style.css` (Serves `web/style.css`)
+- **Headers**: None required
+- **Query Parameters**: None
+- **Request Body**: None
+
+#### Responses
+
+- **Status Code**: `200 OK`
+  - `/`: Returns HTML document with `Content-Type: text/html; charset=utf-8`.
+  - `/app.js`: Returns JavaScript application script with `Content-Type: text/javascript; charset=utf-8`.
+  - `/style.css`: Returns CSS stylesheet with `Content-Type: text/css; charset=utf-8`.
+
+All static responses include global security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Cross-Origin-Opener-Policy`, `Content-Security-Policy`).
+
+#### Practical Usage
+Requested by web browsers when accessing the application UI at the root server address.
+
+---
+
+## Generic Error Responses
+
+In addition to endpoint-specific errors, the HTTP server returns standardized JSON error payloads for unrecognized routes or unhandled exceptions:
+
+### Unrecognized Route (`404 Not Found`)
+Returned when an HTTP request path does not match any recognized API endpoint or static asset.
+
+- **Status Code**: `404 Not Found`
+- **Body Schema**:
+  ```json
+  {
+    "error": "Not found"
+  }
+  ```
+
+### Server Error (`500 Internal Server Error`)
+Returned when an unexpected error or unhandled exception occurs while serving a request.
+
+- **Status Code**: `500 Internal Server Error`
+- **Body Schema**:
+  ```json
+  {
+    "error": "Unable to serve request"
+  }
+  ```
