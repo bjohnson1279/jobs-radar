@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { fileURLToPath } from 'node:url';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import http from 'node:http';
 
 test('server endpoints, security headers, validation, and static files', async (t) => {
     const testPort = 3199;
@@ -38,6 +39,7 @@ test('server endpoints, security headers, validation, and static files', async (
     assert.equal(headers.get('referrer-policy'), 'strict-origin-when-cross-origin');
     assert.equal(headers.get('cross-origin-opener-policy'), 'same-origin');
     assert.equal(headers.get('content-security-policy'), "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'");
+    assert.equal(headers.get('permissions-policy'), 'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()');
 
     // Prototype property lookup returns 404
     const protoResponse = await fetch(`${baseUrl}/toString`);
@@ -179,4 +181,23 @@ test('server endpoints, security headers, validation, and static files', async (
     const notFoundRes = await fetch(`${baseUrl}/api/unknown-endpoint`);
     assert.equal(notFoundRes.status, 404);
     assert.equal((await notFoundRes.json()).error, 'Not found');
+
+    // Malformed request targets and proxy-style non-origin paths return 400 Bad Request
+    const malformedStatus = await new Promise<number>((resolve, reject) => {
+        const req = http.request({ host: '127.0.0.1', port: testPort, path: 'http://[' }, (res) => {
+            resolve(res.statusCode ?? 0);
+        });
+        req.on('error', reject);
+        req.end();
+    });
+    assert.equal(malformedStatus, 400);
+
+    const nonOriginStatus = await new Promise<number>((resolve, reject) => {
+        const req = http.request({ host: '127.0.0.1', port: testPort, path: 'http://evil.com/api/jobs' }, (res) => {
+            resolve(res.statusCode ?? 0);
+        });
+        req.on('error', reject);
+        req.end();
+    });
+    assert.equal(nonOriginStatus, 400);
 });
