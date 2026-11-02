@@ -19,6 +19,8 @@ export const server = createServer(async (req, res) => {
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    // Restrict access to sensitive browser device APIs (defense-in-depth)
+    res.setHeader('Permissions-Policy', 'geolocation=(), camera=(), microphone=()');
     res.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'");
     const url = new URL(req.url ?? '/', 'http://localhost');
     const json = (status: number, data: unknown) => {

@@ -37,6 +37,7 @@ test('server endpoints, security headers, validation, and static files', async (
     assert.equal(headers.get('x-frame-options'), 'DENY');
     assert.equal(headers.get('referrer-policy'), 'strict-origin-when-cross-origin');
     assert.equal(headers.get('cross-origin-opener-policy'), 'same-origin');
+    assert.equal(headers.get('permissions-policy'), 'geolocation=(), camera=(), microphone=()');
     assert.equal(headers.get('content-security-policy'), "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'");
 
     // Prototype property lookup returns 404
