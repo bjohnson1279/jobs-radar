@@ -200,4 +200,23 @@ test('server endpoints, security headers, validation, and static files', async (
         req.end();
     });
     assert.equal(nonOriginStatus, 400);
+
+    // Protocol-relative and backslash request targets return 400 Bad Request
+    const protocolRelativeStatus = await new Promise<number>((resolve, reject) => {
+        const req = http.request({ host: '127.0.0.1', port: testPort, path: '//attacker.com/api/jobs' }, (res) => {
+            resolve(res.statusCode ?? 0);
+        });
+        req.on('error', reject);
+        req.end();
+    });
+    assert.equal(protocolRelativeStatus, 400);
+
+    const backslashPathStatus = await new Promise<number>((resolve, reject) => {
+        const req = http.request({ host: '127.0.0.1', port: testPort, path: '/\\attacker.com' }, (res) => {
+            resolve(res.statusCode ?? 0);
+        });
+        req.on('error', reject);
+        req.end();
+    });
+    assert.equal(backslashPathStatus, 400);
 });

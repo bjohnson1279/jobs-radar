@@ -26,11 +26,17 @@ export const server = createServer(async (req, res) => {
         res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
         res.end(JSON.stringify(data));
     };
-    // Security: Only accept origin-form request targets starting with '/' and validate URL structure
+    // Security: Only accept origin-form request targets starting with a single '/' without protocol-relative slashes
+    // or backslashes, which WHATWG URL parses as hostname/origin changes (e.g., //evil.com or /\evil.com).
     let url: URL;
     try {
-        if (!req.url?.startsWith('/')) { json(400, { error: 'Bad Request' }); return; }
+        if (!req.url?.startsWith('/') || req.url.startsWith('//') || req.url.includes('\\')) {
+            json(400, { error: 'Bad Request' }); return;
+        }
         url = new URL(req.url, 'http://localhost');
+        if (url.origin !== 'http://localhost') {
+            json(400, { error: 'Bad Request' }); return;
+        }
     } catch {
         json(400, { error: 'Bad Request' }); return;
     }
