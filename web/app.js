@@ -38,7 +38,23 @@ function render() {
     status.textContent = state.error || (state.refreshing ? 'Searching job boards. This can take a few minutes…'
         : state.updatedAt ? `${jobs.length} matches · Highest score first · Updated ${new Date(state.updatedAt).toLocaleString()}`
             : 'No search yet. Search job boards to load current listings.');
-    if (state.updatedAt && !jobs.length) results.append(element('p', 'No listings match these filters. Try a broader search or refresh the job boards.'));
+    if (state.updatedAt && !jobs.length) {
+        const emptyState = element('div');
+        emptyState.append(element('p', 'No listings match these filters. Try a broader search or refresh the job boards.'));
+        if (query.value || locationFilter.value !== 'all' || applicationFilter.value !== 'unapplied') {
+            const clearBtn = element('button', 'Clear filters');
+            clearBtn.setAttribute('aria-label', 'Clear active filters and show all listings');
+            clearBtn.addEventListener('click', () => {
+                query.value = '';
+                locationFilter.value = 'all';
+                applicationFilter.value = 'unapplied';
+                render();
+                query.focus();
+            });
+            emptyState.append(clearBtn);
+        }
+        results.append(emptyState);
+    }
     for (const job of jobs) {
         const card = element('article');
         const heading = element('div', undefined, 'heading');
