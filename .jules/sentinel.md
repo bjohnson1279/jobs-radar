@@ -11,3 +11,8 @@ This journal records critical security learnings and vulnerability patterns spec
 **Vulnerability:** Checking `req.url.startsWith('/')` is insufficient to guarantee origin-form paths. Protocol-relative request targets like `//attacker.com/api/jobs` or paths with backslashes like `/\attacker.com` satisfy `.startsWith('/')`, but the WHATWG URL parser interprets `//` as a scheme-relative URI and converts backslashes to forward slashes, causing the parsed `url.origin` to change to an untrusted external host (e.g. `http://attacker.com`).
 **Learning:** In WHATWG URL parsing, any string starting with `//` or containing backslashes immediately following the root slash can override the base URL's origin and hostname.
 **Prevention:** Disallow paths starting with `//` or containing `\`, and assert `url.origin === baseOrigin` after `new URL(req.url, baseOrigin)` parsing to fail securely with `400 Bad Request`.
+
+## 2026-11-03 - Media Type Confusion on Mutating JSON Endpoints
+**Vulnerability:** In native HTTP servers handling JSON mutations, relying solely on custom headers (like `X-Jobs-Radar`) without validating the `Content-Type` header allows clients and potential cross-origin or proxy intermediaries to submit arbitrary MIME types or unexpected encodings without contract enforcement.
+**Learning:** Checking media types early (`req.headers['content-type']?.split(';')[0].trim().toLowerCase() === 'application/json'`) fails fast with `415 Unsupported Media Type` before streaming or deserializing request bodies, preventing media-type confusion and ensuring strictly typed input processing.
+**Prevention:** Always validate that incoming payload media types match expected mime-types before consuming request streams on mutating JSON endpoints.

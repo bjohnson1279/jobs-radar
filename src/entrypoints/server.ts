@@ -57,6 +57,9 @@ export const server = createServer(async (req, res) => {
             json(202, { refreshing: true });
         } else if (url.pathname === '/api/application' && req.method === 'POST') {
             if (req.headers['x-jobs-radar'] !== 'application') { json(403, { error: 'Invalid application request' }); return; }
+            // Security: Enforce Content-Type to guard against media-type confusion and ensure JSON payload
+            const contentType = req.headers['content-type']?.split(';')[0].trim().toLowerCase();
+            if (contentType !== 'application/json') { json(415, { error: 'Content-Type must be application/json' }); return; }
             let body = '';
             for await (const chunk of req) {
                 if (body.length + chunk.length > 4096) { json(413, { error: 'Request too large' }); return; }

@@ -83,16 +83,34 @@ test('server endpoints, security headers, validation, and static files', async (
     // Rejects missing header with 403
     const appNoHeaderRes = await fetch(`${baseUrl}/api/application`, {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: 'gh-acme-101', applied: true }),
     });
     assert.equal(appNoHeaderRes.status, 403);
     assert.equal((await appNoHeaderRes.json()).error, 'Invalid application request');
 
+    // Rejects missing or non-application/json Content-Type with 415
+    const appNoContentTypeRes = await fetch(`${baseUrl}/api/application`, {
+        method: 'POST',
+        headers: { 'X-Jobs-Radar': 'application' },
+        body: JSON.stringify({ id: 'gh-acme-101', applied: true }),
+    });
+    assert.equal(appNoContentTypeRes.status, 415);
+    assert.equal((await appNoContentTypeRes.json()).error, 'Content-Type must be application/json');
+
+    const appWrongContentTypeRes = await fetch(`${baseUrl}/api/application`, {
+        method: 'POST',
+        headers: { 'X-Jobs-Radar': 'application', 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ id: 'gh-acme-101', applied: true }),
+    });
+    assert.equal(appWrongContentTypeRes.status, 415);
+    assert.equal((await appWrongContentTypeRes.json()).error, 'Content-Type must be application/json');
+
     // Rejects payload larger than 4096 bytes with 413
     const largeBody = JSON.stringify({ id: 'gh-acme-101', applied: true, extra: 'x'.repeat(5000) });
     const appLargeRes = await fetch(`${baseUrl}/api/application`, {
         method: 'POST',
-        headers: { 'X-Jobs-Radar': 'application' },
+        headers: { 'X-Jobs-Radar': 'application', 'Content-Type': 'application/json' },
         body: largeBody,
     });
     assert.equal(appLargeRes.status, 413);
@@ -100,7 +118,7 @@ test('server endpoints, security headers, validation, and static files', async (
     // Rejects invalid JSON with 400
     const appBadJsonRes = await fetch(`${baseUrl}/api/application`, {
         method: 'POST',
-        headers: { 'X-Jobs-Radar': 'application' },
+        headers: { 'X-Jobs-Radar': 'application', 'Content-Type': 'application/json' },
         body: '{ invalid json }',
     });
     assert.equal(appBadJsonRes.status, 400);
@@ -109,7 +127,7 @@ test('server endpoints, security headers, validation, and static files', async (
     // Rejects missing schema fields (missing id or non-boolean applied) with 400
     const appMissingIdRes = await fetch(`${baseUrl}/api/application`, {
         method: 'POST',
-        headers: { 'X-Jobs-Radar': 'application' },
+        headers: { 'X-Jobs-Radar': 'application', 'Content-Type': 'application/json' },
         body: JSON.stringify({ applied: true }),
     });
     assert.equal(appMissingIdRes.status, 400);
@@ -117,7 +135,7 @@ test('server endpoints, security headers, validation, and static files', async (
 
     const appNonBoolAppliedRes = await fetch(`${baseUrl}/api/application`, {
         method: 'POST',
-        headers: { 'X-Jobs-Radar': 'application' },
+        headers: { 'X-Jobs-Radar': 'application', 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: 'gh-acme-101', applied: 'true' }),
     });
     assert.equal(appNonBoolAppliedRes.status, 400);
@@ -125,7 +143,7 @@ test('server endpoints, security headers, validation, and static files', async (
     // Rejects future or invalid appliedAt timestamp with 400
     const appFutureDateRes = await fetch(`${baseUrl}/api/application`, {
         method: 'POST',
-        headers: { 'X-Jobs-Radar': 'application' },
+        headers: { 'X-Jobs-Radar': 'application', 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: 'gh-acme-101', applied: true, appliedAt: '2099-01-01T00:00:00.000Z' }),
     });
     assert.equal(appFutureDateRes.status, 400);
@@ -133,7 +151,7 @@ test('server endpoints, security headers, validation, and static files', async (
 
     const appInvalidDateRes = await fetch(`${baseUrl}/api/application`, {
         method: 'POST',
-        headers: { 'X-Jobs-Radar': 'application' },
+        headers: { 'X-Jobs-Radar': 'application', 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: 'gh-acme-101', applied: true, appliedAt: 'invalid-date' }),
     });
     assert.equal(appInvalidDateRes.status, 400);
@@ -141,16 +159,16 @@ test('server endpoints, security headers, validation, and static files', async (
     // Rejects unknown job id with 404
     const appUnknownJobRes = await fetch(`${baseUrl}/api/application`, {
         method: 'POST',
-        headers: { 'X-Jobs-Radar': 'application' },
+        headers: { 'X-Jobs-Radar': 'application', 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: 'unknown-id-123', applied: true }),
     });
     assert.equal(appUnknownJobRes.status, 404);
     assert.equal((await appUnknownJobRes.json()).error, 'Unknown job');
 
-    // Successfully records application with valid past date
+    // Successfully records application with valid past date (supports charset in Content-Type)
     const appSuccessRes = await fetch(`${baseUrl}/api/application`, {
         method: 'POST',
-        headers: { 'X-Jobs-Radar': 'application' },
+        headers: { 'X-Jobs-Radar': 'application', 'Content-Type': 'application/json; charset=utf-8' },
         body: JSON.stringify({ id: 'gh-acme-101', applied: true, appliedAt: '2026-09-02T00:00:00.000Z' }),
     });
     assert.equal(appSuccessRes.status, 200);
@@ -159,7 +177,7 @@ test('server endpoints, security headers, validation, and static files', async (
     // Successfully clears application status when applied: false
     const appClearRes = await fetch(`${baseUrl}/api/application`, {
         method: 'POST',
-        headers: { 'X-Jobs-Radar': 'application' },
+        headers: { 'X-Jobs-Radar': 'application', 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: 'gh-acme-101', applied: false }),
     });
     assert.equal(appClearRes.status, 200);
