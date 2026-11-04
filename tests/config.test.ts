@@ -67,6 +67,56 @@ test('validation reports invalid patterns, weights, missing settings, and typos'
     assert.throws(() => validateConfig({ ...settings, typo: true }), /unknown setting typo/);
     assert.throws(() => validateConfig({ ...settings, sources: undefined }), /sources: expected an object/);
     assert.throws(() => loadConfig('does-not-exist.json'), /Unable to load configuration/);
+
+    // Aliases schema validation: non-object, empty alias key, and empty alias target
+    const invalidAliasesType = structuredClone(settings);
+    (invalidAliasesType.companies as any).aliases = 'invalid';
+    assert.throws(() => validateConfig(invalidAliasesType), /companies\.aliases: expected an object of alias names and targets/);
+
+    const emptyAliasKey = structuredClone(settings);
+    emptyAliasKey.companies.aliases = { '   ': 'Example Engineering' };
+    assert.throws(() => validateConfig(emptyAliasKey), /companies\.aliases: alias names must not be empty/);
+
+    const emptyAliasTarget = structuredClone(settings);
+    emptyAliasTarget.companies.aliases = { 'Example Co': '  ' };
+    assert.throws(() => validateConfig(emptyAliasTarget), /companies\.aliases\.Example Co: must not be empty/);
+
+    // Boolean schema validation
+    const invalidBoolean = structuredClone(settings);
+    (invalidBoolean.location as any).allowMultiCountryRemote = 'true';
+    assert.throws(() => validateConfig(invalidBoolean), /location\.allowMultiCountryRemote: expected true or false/);
+
+    // Array schema validation
+    const invalidArray = structuredClone(settings);
+    (invalidArray.sources as any).greenhouse = 'not-an-array';
+    assert.throws(() => validateConfig(invalidArray), /sources\.greenhouse: expected an array/);
+
+    // Scope schema validation
+    const invalidScope = structuredClone(settings);
+    (invalidScope.scoring.rules[0] as any).scope = 'invalid-scope';
+    assert.throws(() => validateConfig(invalidScope), /scoring\.rules\[0\]\.scope: expected title or content/);
+
+    // Range checks for pages (1-100) and limit (1-10000)
+    const zeroPages = structuredClone(settings);
+    zeroPages.sources.jobicy.maxPages = 0;
+    assert.throws(() => validateConfig(zeroPages), /sources\.jobicy\.maxPages: expected an integer from 1 to 100/);
+
+    const excessivePages = structuredClone(settings);
+    excessivePages.sources.jobicy.maxPages = 101;
+    assert.throws(() => validateConfig(excessivePages), /sources\.jobicy\.maxPages: expected an integer from 1 to 100/);
+
+    const excessiveLimit = structuredClone(settings);
+    excessiveLimit.output.limit = 10001;
+    assert.throws(() => validateConfig(excessiveLimit), /output\.limit: expected an integer from 1 to 10000/);
+
+    const floatLimit = structuredClone(settings);
+    (floatLimit.output as any).limit = 10.5;
+    assert.throws(() => validateConfig(floatLimit), /output\.limit: expected an integer from 1 to 10000/);
+
+    // Optional pattern omitted
+    const optionalStackConfig = structuredClone(settings);
+    delete optionalStackConfig.roles.excludeTitleStackPattern;
+    assert.ok(validateConfig(optionalStackConfig));
 });
 
 test('empty patterns disable exclusions and rules while allowing any title', () => {

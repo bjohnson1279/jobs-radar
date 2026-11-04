@@ -57,5 +57,33 @@ test('history and applications survive refresh, disappearance, and restart', asy
         await assert.rejects(openStore(path));
         assert.equal(await readFile(path, 'utf8'), '{invalid');
         assert.ok(before.includes('firstSeenAt'));
+
+        // Store corruption/invalid schema checks
+        await writeFile(path, JSON.stringify({ version: 2, updatedAt: null, jobs: [] }));
+        await assert.rejects(openStore(path), /Invalid Jobs Radar store/);
+
+        await writeFile(path, JSON.stringify({ version: 1, updatedAt: null, jobs: 'not-an-array' }));
+        await assert.rejects(openStore(path), /Invalid Jobs Radar store/);
+
+        await writeFile(path, JSON.stringify({
+            version: 1,
+            updatedAt: null,
+            jobs: [{ id: 123, firstSeenAt: '2026-10-01T00:00:00Z', lastSeenAt: '2026-10-01T00:00:00Z' }],
+        }));
+        await assert.rejects(openStore(path), /Invalid Jobs Radar store/);
+
+        await writeFile(path, JSON.stringify({
+            version: 1,
+            updatedAt: null,
+            jobs: [{ id: 'valid-id', firstSeenAt: null, lastSeenAt: '2026-10-01T00:00:00Z' }],
+        }));
+        await assert.rejects(openStore(path), /Invalid Jobs Radar store/);
+
+        await writeFile(path, JSON.stringify({
+            version: 1,
+            updatedAt: null,
+            jobs: [{ id: 'valid-id', firstSeenAt: '2026-10-01T00:00:00Z', lastSeenAt: undefined }],
+        }));
+        await assert.rejects(openStore(path), /Invalid Jobs Radar store/);
     } finally { await rm(directory, { recursive: true, force: true }); }
 });

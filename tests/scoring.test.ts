@@ -18,6 +18,15 @@ test('synonyms score once and incidental substrings do not match', () => {
     assert.equal(scoreJob('paid training, email, chair, diagram', title), 13);
     assert.equal(scoreJob('Node.js', 'Senior Engineering Manager'), 0);
     assert.ok(scoreJob('Node.js', title) > scoreJob('Node.js', 'Staff Software Engineer'));
+
+    const excludedDetails = scoreJobDetails('TypeScript Node.js AWS', 'Junior Software Engineer');
+    assert.deepEqual(excludedDetails, {
+        score: 0,
+        rawScore: 0,
+        reasons: ['Title outside preferred role'],
+        pros: [],
+        cons: [{ label: 'Title outside preferred role', points: 0, contribution: 0 }],
+    });
 });
 
 test('culture and management signals apply independent penalties', () => {
