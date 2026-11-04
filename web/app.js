@@ -160,6 +160,13 @@ refresh.addEventListener('click', async () => {
     } catch { status.textContent = 'Unable to start search. Try again.'; refresh.disabled = false; }
 });
 query.addEventListener('input', render);
+query.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && query.value) {
+        event.preventDefault();
+        query.value = '';
+        render();
+    }
+});
 locationFilter.addEventListener('change', render);
 applicationFilter.addEventListener('change', render);
 load();
