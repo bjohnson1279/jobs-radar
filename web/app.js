@@ -38,7 +38,16 @@ function render() {
     status.textContent = state.error || (state.refreshing ? 'Searching job boards. This can take a few minutes…'
         : state.updatedAt ? `${jobs.length} matches · Highest score first · Updated ${new Date(state.updatedAt).toLocaleString()}`
             : 'No search yet. Search job boards to load current listings.');
-    if (state.updatedAt && !jobs.length) {
+    if (!state.updatedAt) {
+        const emptyState = element('div');
+        emptyState.append(element('p', 'No job listings loaded yet. Search configured job boards to discover and rank opportunities.'));
+        const searchBtn = element('button', 'Search job boards');
+        searchBtn.setAttribute('aria-label', 'Search job boards to find and rank job listings');
+        searchBtn.disabled = state.refreshing;
+        searchBtn.addEventListener('click', () => refresh.click());
+        emptyState.append(searchBtn);
+        results.append(emptyState);
+    } else if (!jobs.length) {
         const emptyState = element('div');
         emptyState.append(element('p', 'No listings match these filters. Try a broader search or refresh the job boards.'));
         if (query.value || locationFilter.value !== 'all' || applicationFilter.value !== 'unapplied') {
@@ -49,6 +58,7 @@ function render() {
                 locationFilter.value = 'all';
                 applicationFilter.value = 'unapplied';
                 render();
+                status.textContent = 'Filters cleared. Showing all listings.';
                 query.focus();
             });
             emptyState.append(clearBtn);

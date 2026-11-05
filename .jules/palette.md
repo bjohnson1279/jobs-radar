@@ -13,3 +13,7 @@
 ## 2026-11-06 - Search Filter Autofill and Keyboard Reset Ergonomics
 **Learning:** In real-time client-side filtered dashboards, browser autofill dropdowns on generic search inputs obscure top results and adjacent dropdown controls; furthermore, users expecting standard desktop search interaction often hit Escape to quickly dismiss queries without manually backspacing.
 **Action:** Add `autocomplete="off"` to client-side real-time filter inputs and attach an `Escape` key event listener that clears the value and triggers re-render while retaining focus.
+
+## 2026-11-07 - Empty State Call to Action and Filter Reset Announcements
+**Learning:** Leaving the primary content container empty prior to the first user search leaves keyboard and screen reader users navigating an empty landmark without a clear primary call to action; additionally, clearing empty filter states silently leaves users unaware of how many items were restored.
+**Action:** Populate empty state containers with an informative message and an accessible primary action button matching the main workflow, and update polite live status regions with clear feedback when filters are cleared.
