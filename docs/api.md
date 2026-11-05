@@ -83,14 +83,16 @@ Retrieves the active profile configuration, ranked listing snapshots with calcul
         "appliedAt": "string | null",
         "isRemote": "boolean",
         "isLocal": "boolean",
+        "remoteHint": "boolean | undefined",
         "locationScore": "number",
         "score": "number",
         "rawScore": "number",
+        "reasons": [ "string" ],
         "pros": [
-          { "label": "string", "contribution": "number" }
+          { "label": "string", "points": "number", "contribution": "number" }
         ],
         "cons": [
-          { "label": "string", "contribution": "number" }
+          { "label": "string", "points": "number", "contribution": "number" }
         ]
       }
     ],
@@ -181,6 +183,12 @@ Marks a job listing as applied with an application timestamp, updates the applic
   Returned if the body is invalid JSON, missing required fields, or has an invalid/future date.
   ```json
   {
+    "error": "Invalid JSON"
+  }
+  ```
+  or
+  ```json
+  {
     "error": "id and applied are required"
   }
   ```
@@ -249,7 +257,18 @@ Requested by web browsers when accessing the application UI at the root server a
 
 ## Generic Error Responses
 
-In addition to endpoint-specific errors, the HTTP server returns standardized JSON error payloads for unrecognized routes or unhandled exceptions:
+In addition to endpoint-specific errors, the HTTP server returns standardized JSON error payloads for unrecognized routes, malformed requests, or unhandled exceptions:
+
+### Malformed Request Target (`400 Bad Request`)
+Returned when an incoming request target is not in valid origin-form (e.g. malformed URIs, proxy-style paths with hostnames, protocol-relative URIs starting with `//`, or paths containing backslashes `\`).
+
+- **Status Code**: `400 Bad Request`
+- **Body Schema**:
+  ```json
+  {
+    "error": "Bad Request"
+  }
+  ```
 
 ### Unrecognized Route (`404 Not Found`)
 Returned when an HTTP request path does not match any recognized API endpoint or static asset.
