@@ -9,3 +9,7 @@
 ## 2026-11-04 - Action Feedback and Validation Focus in Card Controls
 **Learning:** In repeating card actions, simply disabling action buttons during asynchronous updates leaves users uncertain whether their input registered; additionally, relying solely on a distant global status bar for field validation fails to guide keyboard and screen reader users to the erroneous input.
 **Action:** Always pair `disabled` state with `aria-busy="true"` and an active progress label (e.g., 'Saving…' / 'Removing…') on the triggered button, and call `element.reportValidity()` and `element.focus()` on invalid inputs before initiating network actions.
+
+## 2026-11-06 - Search Filter Autofill and Keyboard Reset Ergonomics
+**Learning:** In real-time client-side filtered dashboards, browser autofill dropdowns on generic search inputs obscure top results and adjacent dropdown controls; furthermore, users expecting standard desktop search interaction often hit Escape to quickly dismiss queries without manually backspacing.
+**Action:** Add `autocomplete="off"` to client-side real-time filter inputs and attach an `Escape` key event listener that clears the value and triggers re-render while retaining focus.
