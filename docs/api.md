@@ -223,6 +223,14 @@ Marks a job listing as applied with an application timestamp, updates the applic
   }
   ```
 
+- **Status Code**: `415 Unsupported Media Type`
+  Returned if the `Content-Type` header is missing or is not `application/json`.
+  ```json
+  {
+    "error": "Content-Type must be application/json"
+  }
+  ```
+
 #### Practical Usage
 Invoked when marking a job applied, changing an application date, or clicking "Undo applied" on a card in the web interface. Application records persist across future job refreshes and config reloads.
 
