@@ -31,6 +31,22 @@ test('country aliases can be changed and mixed-country eligibility is an explici
     multi.location.allowMultiCountryRemote = true;
     assert.equal(createLocationMatcher(multi).parseLocation('Remote - US / Canada').isRemoteEligible, true);
     assert.equal(createLocationMatcher(multi).parseLocation('Remote - Canada').isRemoteEligible, false);
+
+    const unspecified = structuredClone(settings);
+    unspecified.location.allowUnspecifiedRemote = true;
+    const unspecifiedMatcher = createLocationMatcher(unspecified);
+    // Generic remote locations without specified country become eligible
+    assert.equal(unspecifiedMatcher.parseLocation('Remote').isRemoteEligible, true);
+    assert.equal(unspecifiedMatcher.parseLocation('Remote - Work from home').isRemoteEligible, true);
+    assert.equal(unspecifiedMatcher.parseLocation('Fully Remote').isRemoteEligible, true);
+    // Explicit target country remains eligible
+    assert.equal(unspecifiedMatcher.parseLocation('Remote - United States').isRemoteEligible, true);
+    // Explicit foreign country and restricted global keywords remain rejected
+    assert.equal(unspecifiedMatcher.parseLocation('Remote - Canada').isRemoteEligible, false);
+    assert.equal(unspecifiedMatcher.parseLocation('Remote - EMEA').isRemoteEligible, false);
+    assert.equal(unspecifiedMatcher.parseLocation('Remote - Worldwide').isRemoteEligible, false);
+    assert.equal(unspecifiedMatcher.parseLocation('Anywhere Remote').isRemoteEligible, false);
+
     assert.throws(() => validateConfig({ ...settings, location: { ...settings.location, country: { name: '', aliases: [] } } }), /country.name/);
 });
 

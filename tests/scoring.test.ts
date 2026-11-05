@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { companyBonusFor, isBlocklisted, scoreJob, scoreJobDetails } from '../src/domain/scoring.ts';
+import { companyBonusFor, isBlocklisted, plainText, scoreJob, scoreJobDetails } from '../src/domain/scoring.ts';
 import { parseLocation, locationScoreFor } from '../src/domain/location.ts';
 
 const title = 'Senior Software Engineer';
@@ -67,4 +67,27 @@ test('remote eligibility respects country restrictions', () => {
     assert.equal(parseLocation('Remote - US / Canada').isRemoteEligible, false);
     assert.equal(parseLocation('Anywhere').isRemoteEligible, false);
     assert.equal(parseLocation('Remote - EMEA').isRemoteEligible, false);
+});
+
+test('plainText strips HTML tags, decodes supported entities, and collapses whitespace', () => {
+    // Pure text without tags or entities
+    assert.equal(plainText('Simple plain text string'), 'Simple plain text string');
+
+    // Tags removal
+    assert.equal(plainText('<p>Hello <strong>World</strong>!</p>'), ' Hello World ! ');
+
+    // Whitespace collapse (multiple spaces, tabs, newlines, carriage returns)
+    assert.equal(plainText('Hello \n\t\r  world   test'), 'Hello world test');
+    assert.equal(plainText('<div>Line 1</div>\n\n<div>Line 2</div>'), ' Line 1 Line 2 ');
+
+    // Entities decoding: nbsp, #160, amp, #35, #x23, ndash, mdash, #8211, #8212
+    assert.equal(plainText('Word&nbsp;Word&#160;Word&NBSP;Word'), 'Word Word Word Word');
+    assert.equal(plainText('AT&amp;T &AMP; Co'), 'AT&T & Co');
+    assert.equal(plainText('C&#35; and C&#x23; and C&#X23;'), 'C# and C# and C#');
+    assert.equal(plainText('full&ndash;stack and full&mdash;stack'), 'full-stack and full-stack');
+    assert.equal(plainText('front&#8211;end and back&#8212;end'), 'front-end and back-end');
+
+    // Combined HTML snippet
+    const htmlSnippet = '<h1>Title</h1><p>C&#35; &amp; Node.js&nbsp;&ndash;&nbsp;fast&ndash;paced</p>';
+    assert.equal(plainText(htmlSnippet), ' Title C# & Node.js - fast-paced ');
 });

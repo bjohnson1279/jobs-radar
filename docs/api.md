@@ -9,6 +9,7 @@ All responses include security headers:
 - `X-Frame-Options: DENY`
 - `Referrer-Policy: strict-origin-when-cross-origin`
 - `Cross-Origin-Opener-Policy: same-origin`
+- `Cross-Origin-Resource-Policy: same-origin`
 - `Content-Security-Policy: default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'`
 - `Permissions-Policy: accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()`
 
@@ -220,6 +221,13 @@ Marks a job listing as applied with an application timestamp, updates the applic
   ```json
   {
     "error": "Request too large"
+  }
+  ```
+- **Status Code**: `415 Unsupported Media Type`
+  Returned if the `Content-Type` header is missing or is not `application/json`.
+  ```json
+  {
+    "error": "Content-Type must be application/json"
   }
   ```
 
