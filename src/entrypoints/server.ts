@@ -21,7 +21,8 @@ export const server = createServer(async (req, res) => {
     res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
     // Security: Block cross-origin no-cors subresource reads and embeddings (XS-Leaks / Spectre)
     res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
-    res.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'");
+    // Security: Restrict origins, ban plugin objects/base-tags/frame-embedding, and prohibit form submission exfiltration
+    res.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'none'");
     // Disable unnecessary browser device access and sensitive permissions
     res.setHeader('Permissions-Policy', 'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()');
     const json = (status: number, data: unknown) => {
