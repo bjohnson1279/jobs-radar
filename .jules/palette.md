@@ -17,3 +17,7 @@
 ## 2026-11-07 - Empty State Call to Action and Filter Reset Announcements
 **Learning:** Leaving the primary content container empty prior to the first user search leaves keyboard and screen reader users navigating an empty landmark without a clear primary call to action; additionally, clearing empty filter states silently leaves users unaware of how many items were restored.
 **Action:** Populate empty state containers with an informative message and an accessible primary action button matching the main workflow, and update polite live status regions with clear feedback when filters are cleared.
+
+## 2026-11-08 - Region Landmark Exposure and Quick-Search Ergonomics
+**Learning:** A generic container with `aria-label` is not announced as a landmark region by screen readers unless given `role="region"`, and card `<article>` elements announced without `aria-labelledby` fail to convey their subject during landmark navigation. Additionally, power users and keyboard navigators expect a standard `/` hotkey to focus the primary filter from anywhere on the page without modifying form contents.
+**Action:** Always assign `role="region"` to custom labelled containers and connect `<article>` cards to their heading IDs via `aria-labelledby`. Support `/` keyboard navigation with `aria-keyshortcuts="/"` while ignoring key events originating from active form inputs.
