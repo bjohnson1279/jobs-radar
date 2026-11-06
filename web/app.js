@@ -67,9 +67,13 @@ function render() {
     }
     for (const job of jobs) {
         const card = element('article');
+        const titleId = `job-title-${job.id}`;
+        card.setAttribute('aria-labelledby', titleId);
         const heading = element('div', undefined, 'heading');
         const info = element('div');
-        info.append(element('h2', job.title), element('p', `${job.company} · ${job.location || 'Location unspecified'}`, 'meta'));
+        const titleHeading = element('h2', job.title);
+        titleHeading.id = titleId;
+        info.append(titleHeading, element('p', `${job.company} · ${job.location || 'Location unspecified'}`, 'meta'));
         const score = element('div', undefined, 'score');
         score.setAttribute('aria-label', `Fit score: ${job.score} out of 100`);
         score.append(element('strong', String(job.score)), element('small', 'FIT / 100'));
@@ -170,11 +174,19 @@ refresh.addEventListener('click', async () => {
     } catch { status.textContent = 'Unable to start search. Try again.'; refresh.disabled = false; }
 });
 query.addEventListener('input', render);
+query.addEventListener('search', render);
 query.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && query.value) {
         event.preventDefault();
         query.value = '';
         render();
+    }
+});
+document.addEventListener('keydown', (event) => {
+    if (event.key === '/' && !['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+        event.preventDefault();
+        query.focus();
+        query.select?.();
     }
 });
 locationFilter.addEventListener('change', render);
