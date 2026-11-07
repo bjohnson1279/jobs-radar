@@ -29,6 +29,8 @@ Patterns are case-insensitive regular expressions inside JSON strings. Escape ba
 
 Set `location.country.name` and literal `aliases`, such as United States with US, USA, U.S., and U.S.A. Country evidence comes from location or structured source metadata, not the title. Configured local areas can establish eligibility when no foreign country conflicts.
 
+`location.remotePattern` defines the regex pattern tested against the combined location and title to identify remote opportunities (for example, `"\\bremote\\b|\\banywhere\\b|\\bworldwide\\b"`).
+
 The examples set `allowUnspecifiedRemote: false` and `allowMultiCountryRemote: false`. Unknown-country, worldwide, and mixed target/foreign listings are excluded. Enable either option only if you want that broader interpretation. Country-name recognition supplements `restrictedRemotePattern`, which can reject additional cities/regions/global wording. Adjust those restrictions when changing countries.
 
 `location.label` provides a human-readable name for your target region (for example, `"Seattle area"`), displayed in the CLI output headers and web interface. `location.proximityLabel` defines the display name used in score breakdowns/pros when a job earns local tier points (for example, `"Seattle proximity"`).
@@ -56,3 +58,16 @@ No authentication credentials are needed for the currently used public listing e
 ## Output
 
 `output.limit` specifies the maximum number of results printed per section (Local Matches and Remote Matches) when running the CLI search (`npm run search`). It must be an integer between 1 and 10000.
+
+## Environment variables
+
+Runtime options can be overridden using environment variables or a `.env` file when running Docker Compose:
+
+| Variable | Scope | Default | Description |
+| --- | --- | --- | --- |
+| `JOBS_RADAR_CONFIG` | Native / Docker Compose | `config/settings.local.json` (or `config/settings.example.json`) | Path to the active JSON search configuration file. |
+| `JOBS_RADAR_DATA_FILE` | Native | `data/jobs.json` | Path to persistent listing history and application store JSON file. |
+| `PORT` | Native server | `3100` (auto-increments up to `3200` if busy) | Fixed TCP port for the local HTTP server. Must be an integer between 1 and 65535. |
+| `HOST` | Native server | `127.0.0.1` | Network interface IP address on which the HTTP server listens. |
+| `JOBS_RADAR_PORT` | Docker Compose (`.env`) | `3100` | Host port mapped to the container's web interface port in `compose.yaml`. |
+| `JOBS_RADAR_DATA_DIR` | Docker Compose (`.env`) | `./data` | Host directory bind-mounted to `/app/data` for persistent job history. |
