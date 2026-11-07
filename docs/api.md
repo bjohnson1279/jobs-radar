@@ -15,6 +15,8 @@ All responses include security headers:
 
 JSON endpoints return `Cache-Control: no-store` and `Content-Type: application/json`.
 
+Incoming `Host` headers are validated against authorized local hosts (`localhost`, `127.0.0.1`, `[::1]`, and configured `HOST`) to prevent DNS rebinding attacks from malicious websites attempting to access local API endpoints.
+
 Mutating requests (`POST /api/refresh` and `POST /api/application`) enforce custom header checks (`X-Jobs-Radar`) as a lightweight CSRF guard against cross-origin ambient browser requests.
 
 ---
@@ -267,14 +269,31 @@ Requested by web browsers when accessing the application UI at the root server a
 
 In addition to endpoint-specific errors, the HTTP server returns standardized JSON error payloads for unrecognized routes, malformed requests, or unhandled exceptions:
 
-### Malformed Request Target (`400 Bad Request`)
-Returned when an incoming request target is not in valid origin-form (e.g. malformed URIs, proxy-style paths with hostnames, protocol-relative URIs starting with `//`, or paths containing backslashes `\`).
+### Malformed Request Target or Invalid Host (`400 Bad Request`)
+Returned when an incoming request target is not in valid origin-form (e.g. malformed URIs, proxy-style paths with hostnames, protocol-relative URIs starting with `//`, or paths containing backslashes `\`) or when the `Host` header is missing or malformed.
 
 - **Status Code**: `400 Bad Request`
 - **Body Schema**:
   ```json
   {
     "error": "Bad Request"
+  }
+  ```
+  or
+  ```json
+  {
+    "error": "Invalid Host header"
+  }
+  ```
+
+### Unauthorized Host (`403 Forbidden`)
+Returned when an incoming request includes an unauthorized `Host` header (such as an external domain from a DNS rebinding attempt) not matching the allowed local hostnames.
+
+- **Status Code**: `403 Forbidden`
+- **Body Schema**:
+  ```json
+  {
+    "error": "Invalid Host header"
   }
   ```
 
