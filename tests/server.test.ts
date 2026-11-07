@@ -238,4 +238,54 @@ test('server endpoints, security headers, validation, and static files', async (
         req.end();
     });
     assert.equal(backslashPathStatus, 400);
+
+    // Host header validation tests (defense against DNS rebinding)
+    const requestWithHost = (hostHeader: string | undefined, path = '/api/jobs') =>
+        new Promise<{ status: number; body: any }>((resolve, reject) => {
+            const headers: Record<string, string> = {};
+            if (hostHeader !== undefined) headers.host = hostHeader;
+            const req = http.request({
+                host: '127.0.0.1',
+                port: testPort,
+                path,
+                headers,
+            }, (res) => {
+                let data = '';
+                res.on('data', chunk => { data += chunk; });
+                res.on('end', () => {
+                    let parsed: any;
+                    try { parsed = JSON.parse(data); } catch { parsed = data; }
+                    resolve({ status: res.statusCode ?? 0, body: parsed });
+                });
+            });
+            req.on('error', reject);
+            req.end();
+        });
+
+    // Rejects unauthorized external hosts with 403 Forbidden
+    const rebindRes = await requestWithHost('attacker.com');
+    assert.equal(rebindRes.status, 403);
+    assert.deepEqual(rebindRes.body, { error: 'Invalid Host header' });
+
+    const subRebindRes = await requestWithHost('localhost.attacker.com:3199');
+    assert.equal(subRebindRes.status, 403);
+    assert.deepEqual(subRebindRes.body, { error: 'Invalid Host header' });
+
+    // Rejects malformed host headers with 400 Bad Request
+    const userinfoHostRes = await requestWithHost('localhost@attacker.com');
+    assert.equal(userinfoHostRes.status, 400);
+    assert.deepEqual(userinfoHostRes.body, { error: 'Invalid Host header' });
+
+    const pathHostRes = await requestWithHost('localhost/evil');
+    assert.equal(pathHostRes.status, 400);
+    assert.deepEqual(pathHostRes.body, { error: 'Invalid Host header' });
+
+    // Accepts valid local host headers
+    const validLocalhostRes = await requestWithHost(`localhost:${testPort}`, '/api/health');
+    assert.equal(validLocalhostRes.status, 200);
+    assert.deepEqual(validLocalhostRes.body, { status: 'ok' });
+
+    const validIpv6Res = await requestWithHost(`[::1]:${testPort}`, '/api/health');
+    assert.equal(validIpv6Res.status, 200);
+    assert.deepEqual(validIpv6Res.body, { status: 'ok' });
 });

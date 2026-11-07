@@ -13,6 +13,8 @@ let error: string | null = null;
 const assets: Record<string, [string, string]> = {
     '/': ['index.html', 'text/html'], '/app.js': ['app.js', 'text/javascript'], '/style.css': ['style.css', 'text/css'],
 };
+const host = process.env.HOST ?? '127.0.0.1';
+const allowedHosts = new Set(['localhost', '127.0.0.1', '[::1]', ...(host !== '0.0.0.0' ? [host] : [])]);
 
 export const server = createServer(async (req, res) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -29,6 +31,20 @@ export const server = createServer(async (req, res) => {
         res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
         res.end(JSON.stringify(data));
     };
+    // Security: Validate Host header to protect against DNS rebinding attacks targeting local services.
+    // Unrecognized or malicious host headers (e.g. from external domains resolving to 127.0.0.1) are rejected.
+    const rawHost = req.headers.host;
+    if (!rawHost || typeof rawHost !== 'string' || /[/\\?#@]/.test(rawHost)) {
+        json(400, { error: 'Invalid Host header' }); return;
+    }
+    try {
+        const hostUrl = new URL(`http://${rawHost}`);
+        if (!allowedHosts.has(hostUrl.hostname) || hostUrl.pathname !== '/') {
+            json(403, { error: 'Invalid Host header' }); return;
+        }
+    } catch {
+        json(400, { error: 'Invalid Host header' }); return;
+    }
     // Security: Only accept origin-form request targets starting with a single '/' without protocol-relative slashes
     // or backslashes, which WHATWG URL parses as hostname/origin changes (e.g., //evil.com or /\evil.com).
     let url: URL;
@@ -92,7 +108,6 @@ let port = Number(process.env.PORT ?? 3100);
 if (!Number.isInteger(port) || port < 1 || port > 65535) {
     throw new Error('PORT must be an integer between 1 and 65535');
 }
-const host = process.env.HOST ?? '127.0.0.1';
 server.on('error', (error: NodeJS.ErrnoException) => {
     if (error.code === 'EADDRINUSE' && !process.env.PORT && port < 3200) {
         port += 1;
