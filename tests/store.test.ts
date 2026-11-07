@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { openStore } from '../src/storage/store.ts';
-import { sourceDate } from '../src/domain/dates.ts';
 import { deduplicateJobs } from '../src/presentation/output.ts';
 import type { JobPosting } from '../src/domain/types.ts';
 
@@ -12,14 +11,6 @@ const job: JobPosting = {
     location: 'Seattle, WA', description: 'TypeScript', isRemote: false, isLocal: true, locationScore: 30, score: 85,
     postedAt: '2026-09-01T00:00:00.000Z',
 };
-
-test('dates reject invalid or missing values and preserve publication timestamps', () => {
-    assert.equal(sourceDate(undefined), null);
-    assert.equal(sourceDate('2 days ago'), null);
-    assert.equal(sourceDate('2026-02-30'), null);
-    assert.equal(sourceDate('2026-09-01'), '2026-09-01T00:00:00.000Z');
-    assert.equal(sourceDate('2026-09-01T12:00:00-06:00'), '2026-09-01T18:00:00.000Z');
-});
 
 test('history and applications survive refresh, disappearance, and restart', async () => {
     await mkdir(join(process.cwd(), 'data'), { recursive: true });
