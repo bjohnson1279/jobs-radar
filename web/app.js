@@ -83,6 +83,7 @@ function render() {
         titleHeading.id = titleId;
         info.append(titleHeading, element('p', `${job.company} · ${job.location || 'Location unspecified'}`, 'meta'));
         const score = element('div', undefined, 'score');
+        score.setAttribute('role', 'img');
         score.setAttribute('aria-label', `Fit score: ${job.score} out of 100`);
         score.append(element('strong', String(job.score)), element('small', 'FIT / 100'));
         score.title = 'Weighted fit normalized to 0–100. Rounded ties retain the underlying ranking.';
