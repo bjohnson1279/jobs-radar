@@ -25,3 +25,7 @@
 ## 2026-11-09 - Accessible Naming on Composite Score Badges
 **Learning:** Generic `div` elements with `aria-label` but without an explicit ARIA role have `role="generic"`, leading screen readers and assistive technologies to disregard the accessible name and read raw, fragmented badge text (such as '85 FIT / 100').
 **Action:** Assign `role="img"` to styled badge/score containers when providing an `aria-label` so assistive tech recognizes the component as an informative graphic and reliably announces its full composite description.
+
+## 2026-11-10 - Destructive Action Guard and Live Region Cancellation Feedback
+**Learning:** Destructive card actions (such as 'Undo applied') that immediately trigger server deletion upon click risk accidental state loss during browsing; additionally, aborting a prompt leaves keyboard and screen reader users without feedback regarding whether their action was executed or cancelled.
+**Action:** Prompt for confirmation on destructive card removals displaying the specific item context, and announce prompt cancellations to polite live status regions (`role="status"` / `aria-live="polite"`).

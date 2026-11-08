@@ -115,6 +115,10 @@ function render() {
                 status.textContent = 'Choose a valid application date.';
                 return;
             }
+            if (!applied && !window.confirm(`Remove applied status for "${job.title}" at ${job.company}?`)) {
+                status.textContent = 'Undo applied cancelled.';
+                return;
+            }
             save.disabled = true; undo.disabled = true;
             const targetBtn = applied ? save : undo;
             const origText = targetBtn.textContent;
