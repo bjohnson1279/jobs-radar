@@ -25,3 +25,7 @@
 ## 2026-11-09 - Accessible Naming on Composite Score Badges
 **Learning:** Generic `div` elements with `aria-label` but without an explicit ARIA role have `role="generic"`, leading screen readers and assistive technologies to disregard the accessible name and read raw, fragmented badge text (such as '85 FIT / 100').
 **Action:** Assign `role="img"` to styled badge/score containers when providing an `aria-label` so assistive tech recognizes the component as an informative graphic and reliably announces its full composite description.
+
+## 2026-11-10 - Search Filter Clear Ergonomics and State Announcements
+**Learning:** Native `type="search"` cancel decorations render inconsistently across browsers and lack screen reader announcements when cleared; relying solely on keyboard shortcuts (`Escape`) leaves pointer and assistive tech users without a clear, accessible trigger to clear search terms.
+**Action:** Suppress inconsistent native cancel decorations (`::-webkit-search-cancel-button`), provide an explicit button with `aria-label="Clear search input"`, retain keyboard focus on the input upon clearing, and announce query reset status to live regions.

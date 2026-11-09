@@ -3,6 +3,7 @@ const results = document.querySelector('#jobs');
 const status = document.querySelector('#status');
 const refresh = document.querySelector('#refresh');
 const query = document.querySelector('#query');
+const clearQueryBtn = document.querySelector('#clear-query');
 const locationFilter = document.querySelector('#location');
 const applicationFilter = document.querySelector('#applications');
 function ageLabel(date, label) {
@@ -26,6 +27,9 @@ function render() {
         locationFilter.options[1].disabled = !state.profile.includeLocal;
         locationFilter.options[2].textContent = state.profile.includeLocal ? `${remoteLabel} outside ${label}` : remoteLabel;
         locationFilter.options[2].disabled = !state.profile.includeRemote;
+    }
+    if (clearQueryBtn) {
+        clearQueryBtn.hidden = !query.value;
     }
     const term = query.value.trim().toLowerCase();
     // Performance optimization: Filter cheap boolean and status flags (application & location filters)
@@ -182,13 +186,22 @@ refresh.addEventListener('click', async () => {
         await load();
     } catch { status.textContent = 'Unable to start search. Try again.'; refresh.disabled = false; }
 });
+function clearQuery() {
+    if (!query.value) return;
+    query.value = '';
+    render();
+    status.textContent = 'Search filter cleared. Showing all matching listings.';
+    query.focus();
+}
+if (clearQueryBtn) {
+    clearQueryBtn.addEventListener('click', clearQuery);
+}
 query.addEventListener('input', render);
 query.addEventListener('search', render);
 query.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && query.value) {
         event.preventDefault();
-        query.value = '';
-        render();
+        clearQuery();
     }
 });
 document.addEventListener('keydown', (event) => {
