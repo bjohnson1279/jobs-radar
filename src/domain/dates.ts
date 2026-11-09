@@ -12,10 +12,7 @@ function isValidCalendar(value: string): boolean {
     return d >= 1 && d <= (m === 2 && isLeapYear(y) ? 29 : daysInMonth[m]);
 }
 
-// Performance optimization: Avoid expensive Date.parse template-string construction and new Date().toISOString()
-// round-trip string allocations on every call by validating calendar dates with direct integer arithmetic.
-// In addition, bound-cache parsed date results in a Map (capped at 1,000 entries) since feed date strings repeat heavily.
-// Benchmark impact: ~30x speedup for repeated dates (~3,240ms down to ~106ms for 1.6M invocations), ~2.5x speedup uncached.
+// Fast-path calendar validation with direct integer arithmetic; bounded cache for repeating feed dates.
 const dateCache = new Map<string, string | null>();
 
 export function sourceDate(value: unknown): string | null {
