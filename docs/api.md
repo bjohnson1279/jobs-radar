@@ -17,7 +17,7 @@ JSON endpoints return `Cache-Control: no-store` and `Content-Type: application/j
 
 Incoming `Host` headers are validated against authorized local hosts (`localhost`, `127.0.0.1`, `[::1]`, and configured `HOST`) to prevent DNS rebinding attacks from malicious websites attempting to access local API endpoints.
 
-Mutating requests (`POST /api/refresh` and `POST /api/application`) enforce custom header checks (`X-Jobs-Radar`) as a lightweight CSRF guard against cross-origin ambient browser requests.
+Mutating requests (`POST /api/refresh` and `POST /api/application`) enforce custom header checks (`X-Jobs-Radar`) and validate incoming `Origin` headers against authorized local hosts (`allowedHosts`) when present, providing defense-in-depth against cross-origin CSRF attacks.
 
 ---
 
@@ -132,10 +132,16 @@ Triggers an asynchronous search across configured ATS boards (Greenhouse, Lever,
   ```
 
 - **Status Code**: `403 Forbidden`
-  Returned if the `X-Jobs-Radar: refresh` header is missing or incorrect.
+  Returned if the `X-Jobs-Radar: refresh` header is missing or incorrect, or if the `Origin` header is untrusted.
   ```json
   {
     "error": "Invalid refresh request"
+  }
+  ```
+  or
+  ```json
+  {
+    "error": "Invalid Origin header"
   }
   ```
 
@@ -203,10 +209,16 @@ Marks a job listing as applied with an application timestamp, updates the applic
   ```
 
 - **Status Code**: `403 Forbidden`
-  Returned if the `X-Jobs-Radar: application` header is missing or incorrect.
+  Returned if the `X-Jobs-Radar: application` header is missing or incorrect, or if the `Origin` header is untrusted.
   ```json
   {
     "error": "Invalid application request"
+  }
+  ```
+  or
+  ```json
+  {
+    "error": "Invalid Origin header"
   }
   ```
 

@@ -45,6 +45,19 @@ export const server = createServer(async (req, res) => {
     } catch {
         json(400, { error: 'Invalid Host header' }); return;
     }
+    // Security: Validate Origin header when present on mutating requests against allowed hosts to protect
+    // against cross-origin CSRF attacks from external sites triggering state mutations.
+    const origin = req.headers.origin;
+    if (origin && req.method === 'POST') {
+        try {
+            const parsedOrigin = new URL(origin);
+            if (!['http:', 'https:'].includes(parsedOrigin.protocol) || !allowedHosts.has(parsedOrigin.hostname)) {
+                json(403, { error: 'Invalid Origin header' }); return;
+            }
+        } catch {
+            json(403, { error: 'Invalid Origin header' }); return;
+        }
+    }
     // Security: Only accept origin-form request targets starting with a single '/' without protocol-relative slashes
     // or backslashes, which WHATWG URL parses as hostname/origin changes (e.g., //evil.com or /\evil.com).
     let url: URL;
