@@ -11,10 +11,7 @@ export function createRanker(config: SearchConfig) {
     const includeLocal = config.location.includeLocal;
     const includeRemote = config.location.includeRemote;
 
-    // Performance optimization: Filter location eligibility before running expensive HTML plain-text cleaning
-    // and multi-regex scoring rule evaluations on discarded candidates. Single-pass iteration also eliminates
-    // intermediate array allocations across .filter().map().filter().
-    // Benchmark impact: ~1.46x speedup (~31% lower ranking latency) across job feeds.
+    // Filter location eligibility before HTML cleaning/scoring, eliminating intermediate array allocations.
     return <T extends JobPosting>(jobs: T[]) => {
         const ranked: Array<T & ReturnType<typeof scoreJobDetails>> = [];
         for (const job of jobs) {
