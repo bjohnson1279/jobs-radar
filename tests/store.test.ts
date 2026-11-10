@@ -78,3 +78,72 @@ test('history and applications survive refresh, disappearance, and restart', asy
         await assert.rejects(openStore(path), /Invalid Jobs Radar store/);
     } finally { await rm(directory, { recursive: true, force: true }); }
 });
+
+test('store isolates cloned salary metadata and serializes concurrent mutations', async () => {
+    await mkdir(join(process.cwd(), 'data'), { recursive: true });
+    const directory = await mkdtemp(join(process.cwd(), 'data', 'test-store-concurrency-'));
+    try {
+        const path = join(directory, 'jobs.json');
+        const store = await openStore(path);
+
+        const jobWithMetadata: JobPosting = {
+            id: 'gh-meta-1',
+            title: 'Senior Full Stack Engineer',
+            company: 'Meta Corp',
+            url: 'https://example.com/meta',
+            location: 'Remote',
+            description: 'TypeScript',
+            isRemote: true,
+            isLocal: false,
+            locationScore: 0,
+            score: 90,
+            _salary: { min: 140000, max: 180000 },
+            _ashbyCompensation: { min: 145000, max: 185000 },
+        };
+
+        // Record initial job
+        await store.recordSearch([jobWithMetadata], '2026-10-10T00:00:00.000Z');
+
+        // Verify cloned metadata objects do not leak reference to external modifications
+        const snap1 = store.snapshot();
+        assert.equal(snap1.jobs.length, 1);
+        assert.deepEqual(snap1.jobs[0]._salary, { min: 140000, max: 180000 });
+        assert.deepEqual(snap1.jobs[0]._ashbyCompensation, { min: 145000, max: 185000 });
+
+        // Mutating the snapshot object locally must not affect the store or subsequent snapshots
+        if (snap1.jobs[0]._salary) {
+            snap1.jobs[0]._salary.min = 999999;
+        }
+        if (snap1.jobs[0]._ashbyCompensation) {
+            snap1.jobs[0]._ashbyCompensation.max = 999999;
+        }
+
+        const snap2 = store.snapshot();
+        assert.equal(snap2.jobs[0]._salary?.min, 140000);
+        assert.equal(snap2.jobs[0]._ashbyCompensation?.max, 185000);
+
+        // Concurrent mutations test: queue serialization ensures all mutations apply deterministically
+        const mutationPromises: Promise<void>[] = [];
+        for (let i = 1; i <= 5; i++) {
+            mutationPromises.push(
+                store.recordSearch([
+                    {
+                        ...jobWithMetadata,
+                        id: `gh-concurrent-${i}`,
+                    },
+                ], `2026-10-10T00:00:0${i}.000Z`)
+            );
+        }
+
+        await Promise.all(mutationPromises);
+
+        // Store must contain all 5 newly added jobs plus the initial job (6 total)
+        const finalSnap = store.snapshot();
+        assert.equal(finalSnap.jobs.length, 6);
+        for (let i = 1; i <= 5; i++) {
+            assert.ok(finalSnap.jobs.some(j => j.id === `gh-concurrent-${i}`));
+        }
+    } finally {
+        await rm(directory, { recursive: true, force: true });
+    }
+});
