@@ -64,6 +64,14 @@ test('server endpoints, security headers, validation, and static files', async (
     const refreshNoHeaderJson = await refreshNoHeaderRes.json();
     assert.equal(refreshNoHeaderJson.error, 'Invalid refresh request');
 
+    // Origin header validation on mutating requests (defense against cross-origin CSRF)
+    const originForbiddenRes = await fetch(`${baseUrl}/api/refresh`, {
+        method: 'POST',
+        headers: { 'X-Jobs-Radar': 'refresh', 'Origin': 'http://evil.com' },
+    });
+    assert.equal(originForbiddenRes.status, 403);
+    assert.deepEqual(await originForbiddenRes.json(), { error: 'Invalid Origin header' });
+
     // Accepts valid header with 202
     const refreshRes = await fetch(`${baseUrl}/api/refresh`, {
         method: 'POST',
@@ -80,7 +88,27 @@ test('server endpoints, security headers, validation, and static files', async (
     });
     assert.equal(refreshSecondRes.status, 202);
 
+    // Accepts valid origin header with 202
+    const refreshValidOriginRes = await fetch(`${baseUrl}/api/refresh`, {
+        method: 'POST',
+        headers: { 'X-Jobs-Radar': 'refresh', 'Origin': `http://127.0.0.1:${testPort}` },
+    });
+    assert.equal(refreshValidOriginRes.status, 202);
+
     // 4. POST /api/application
+    // Rejects untrusted or null origin header with 403
+    const appOriginNullRes = await fetch(`${baseUrl}/api/application`, {
+        method: 'POST',
+        headers: {
+            'X-Jobs-Radar': 'application',
+            'Content-Type': 'application/json',
+            'Origin': 'null',
+        },
+        body: JSON.stringify({ id: 'gh-acme-101', applied: true }),
+    });
+    assert.equal(appOriginNullRes.status, 403);
+    assert.deepEqual(await appOriginNullRes.json(), { error: 'Invalid Origin header' });
+
     // Rejects missing header with 403
     const appNoHeaderRes = await fetch(`${baseUrl}/api/application`, {
         method: 'POST',
