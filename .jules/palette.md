@@ -34,3 +34,7 @@
 ## 2026-11-10 - Destructive Action Guard and Live Region Cancellation Feedback
 **Learning:** Destructive card actions (such as 'Undo applied') that immediately trigger server deletion upon click risk accidental state loss during browsing; additionally, aborting a prompt leaves keyboard and screen reader users without feedback regarding whether their action was executed or cancelled.
 **Action:** Prompt for confirmation on destructive card removals displaying the specific item context, and announce prompt cancellations to polite live status regions (`role="status"` / `aria-live="polite"`).
+
+## 2026-11-11 - Grammatical Pluralization in Dynamic Counter Live Announcements
+**Learning:** Hardcoding plural nouns in dynamic search status counters (such as '1 matches') introduces noticeable grammatical awkwardness that is prominently voiced by screen readers monitoring `role="status"` live regions on filtered results.
+**Action:** Always condition noun inflections (e.g., `count === 1 ? 'match' : 'matches'`) in status strings and live region updates to maintain natural linguistic flow.

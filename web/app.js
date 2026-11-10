@@ -45,7 +45,7 @@ function render() {
     refresh.setAttribute('aria-busy', state.refreshing ? 'true' : 'false');
     refresh.textContent = state.refreshing ? 'Searching…' : 'Search job boards';
     status.textContent = state.error || (state.refreshing ? 'Searching job boards. This can take a few minutes…'
-        : state.updatedAt ? `${jobs.length} matches · Highest score first · Updated ${new Date(state.updatedAt).toLocaleString()}`
+        : state.updatedAt ? `${jobs.length} ${jobs.length === 1 ? 'match' : 'matches'} · Highest score first · Updated ${new Date(state.updatedAt).toLocaleString()}`
             : 'No search yet. Search job boards to load current listings.');
     if (!state.updatedAt) {
         const emptyState = element('div');
