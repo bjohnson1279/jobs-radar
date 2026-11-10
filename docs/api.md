@@ -309,6 +309,19 @@ Returned when an incoming request includes an unauthorized `Host` header (such a
   }
   ```
 
+### Method Not Allowed (`405 Method Not Allowed`)
+Returned when a request is made to a recognized endpoint using an unsupported HTTP method. The response includes an `Allow` header listing the permitted HTTP method(s).
+
+- **Status Code**: `405 Method Not Allowed`
+- **Headers**:
+  - `Allow: GET` (for `/api/health`, `/api/jobs`, and static assets) or `Allow: POST` (for `/api/refresh` and `/api/application`)
+- **Body Schema**:
+  ```json
+  {
+    "error": "Method Not Allowed"
+  }
+  ```
+
 ### Unrecognized Route (`404 Not Found`)
 Returned when an HTTP request path does not match any recognized API endpoint or static asset.
 
