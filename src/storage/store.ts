@@ -24,10 +24,7 @@ export async function openStore(path: string) {
     } catch (error) {
         if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
     }
-    // Performance optimization: Avoid expensive recursive structuredClone(state) for store snapshots and mutations.
-    // For stores tracking thousands of listings, structuredClone traverses all object graphs and strings recursively,
-    // taking ~3.1ms per call. Direct object-spread cloning (with shallow-cloning of nested salary objects)
-    // takes ~0.08ms per call (~36x speedup) while preserving complete state immutability.
+    // Shallow object-spread snapshot and mutation cloning avoids structuredClone graph-traversal overhead.
     const cloneJob = (job: TrackedJob): TrackedJob => ({
         ...job,
         ...(job._salary ? { _salary: { ...job._salary } } : {}),
