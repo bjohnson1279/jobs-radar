@@ -3,6 +3,7 @@ const results = document.querySelector('#jobs');
 const status = document.querySelector('#status');
 const refresh = document.querySelector('#refresh');
 const query = document.querySelector('#query');
+const clearQueryBtn = document.querySelector('#clear-query');
 const locationFilter = document.querySelector('#location');
 const applicationFilter = document.querySelector('#applications');
 function ageLabel(date, label) {
@@ -27,11 +28,11 @@ function render() {
         locationFilter.options[2].textContent = state.profile.includeLocal ? `${remoteLabel} outside ${label}` : remoteLabel;
         locationFilter.options[2].disabled = !state.profile.includeRemote;
     }
+    if (clearQueryBtn) {
+        clearQueryBtn.hidden = !query.value;
+    }
     const term = query.value.trim().toLowerCase();
-    // Performance optimization: Filter cheap boolean and status flags (application & location filters)
-    // before running text searches. Skip text evaluation entirely when the search query is empty (~70x speedup),
-    // and test company/title before scanning lengthy descriptions to avoid creating concatenated template strings
-    // and lowercasing huge descriptions on every keystroke/filter change.
+    // Evaluate status/location filters before text matching, short-circuiting on company/title before description.
     const jobs = state.jobs.filter(job =>
         (applicationFilter.value === 'all' || (applicationFilter.value === 'applied' ? !!job.appliedAt : !job.appliedAt && job.inLatestSearch))
         && (locationFilter.value === 'all' || (locationFilter.value === 'local' ? job.isLocal : job.isRemote && (!state.profile?.includeLocal || !job.isLocal)))
@@ -115,6 +116,10 @@ function render() {
                 status.textContent = 'Choose a valid application date.';
                 return;
             }
+            if (!applied && !window.confirm(`Remove applied status for "${job.title}" at ${job.company}?`)) {
+                status.textContent = 'Undo applied cancelled.';
+                return;
+            }
             save.disabled = true; undo.disabled = true;
             const targetBtn = applied ? save : undo;
             const origText = targetBtn.textContent;
@@ -182,13 +187,22 @@ refresh.addEventListener('click', async () => {
         await load();
     } catch { status.textContent = 'Unable to start search. Try again.'; refresh.disabled = false; }
 });
+function clearQuery() {
+    if (!query.value) return;
+    query.value = '';
+    render();
+    status.textContent = 'Search filter cleared. Showing all matching listings.';
+    query.focus();
+}
+if (clearQueryBtn) {
+    clearQueryBtn.addEventListener('click', clearQuery);
+}
 query.addEventListener('input', render);
 query.addEventListener('search', render);
 query.addEventListener('keydown', (event) => {
     if (event.key === 'Escape' && query.value) {
         event.preventDefault();
-        query.value = '';
-        render();
+        clearQuery();
     }
 });
 document.addEventListener('keydown', (event) => {
