@@ -32,10 +32,7 @@ function render() {
         clearQueryBtn.hidden = !query.value;
     }
     const term = query.value.trim().toLowerCase();
-    // Performance optimization: Filter cheap boolean and status flags (application & location filters)
-    // before running text searches. Skip text evaluation entirely when the search query is empty (~70x speedup),
-    // and test company/title before scanning lengthy descriptions to avoid creating concatenated template strings
-    // and lowercasing huge descriptions on every keystroke/filter change.
+    // Evaluate status/location filters before text matching, short-circuiting on company/title before description.
     const jobs = state.jobs.filter(job =>
         (applicationFilter.value === 'all' || (applicationFilter.value === 'applied' ? !!job.appliedAt : !job.appliedAt && job.inLatestSearch))
         && (locationFilter.value === 'all' || (locationFilter.value === 'local' ? job.isLocal : job.isRemote && (!state.profile?.includeLocal || !job.isLocal)))
@@ -117,6 +114,10 @@ function render() {
                 dateInput.reportValidity?.();
                 dateInput.focus();
                 status.textContent = 'Choose a valid application date.';
+                return;
+            }
+            if (!applied && !window.confirm(`Remove applied status for "${job.title}" at ${job.company}?`)) {
+                status.textContent = 'Undo applied cancelled.';
                 return;
             }
             save.disabled = true; undo.disabled = true;

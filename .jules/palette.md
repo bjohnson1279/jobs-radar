@@ -29,3 +29,8 @@
 ## 2026-11-10 - Search Filter Clear Ergonomics and State Announcements
 **Learning:** Native `type="search"` cancel decorations render inconsistently across browsers and lack screen reader announcements when cleared; relying solely on keyboard shortcuts (`Escape`) leaves pointer and assistive tech users without a clear, accessible trigger to clear search terms.
 **Action:** Suppress inconsistent native cancel decorations (`::-webkit-search-cancel-button`), provide an explicit button with `aria-label="Clear search input"`, retain keyboard focus on the input upon clearing, and announce query reset status to live regions.
+
+
+## 2026-11-10 - Destructive Action Guard and Live Region Cancellation Feedback
+**Learning:** Destructive card actions (such as 'Undo applied') that immediately trigger server deletion upon click risk accidental state loss during browsing; additionally, aborting a prompt leaves keyboard and screen reader users without feedback regarding whether their action was executed or cancelled.
+**Action:** Prompt for confirmation on destructive card removals displaying the specific item context, and announce prompt cancellations to polite live status regions (`role="status"` / `aria-live="polite"`).
