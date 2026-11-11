@@ -111,7 +111,9 @@ export const server = createServer(async (req, res) => {
             if (input.applied && (!appliedAt || Date.parse(appliedAt) > Date.now())) {
                 json(400, { error: 'Application date must be valid and not in the future' }); return;
             }
-            if (!store.snapshot().jobs.some(job => job.id === input.id)) { json(404, { error: 'Unknown job' }); return; }
+            // Performance optimization: Use O(1) indexed lookup instead of cloning store via store.snapshot()
+            // and running an O(N) linear array scan.
+            if (!store.has(input.id)) { json(404, { error: 'Unknown job' }); return; }
             await store.setApplied(input.id, appliedAt);
             json(200, { saved: true });
         } else if (req.method === 'GET' && Object.hasOwn(assets, url.pathname)) {
