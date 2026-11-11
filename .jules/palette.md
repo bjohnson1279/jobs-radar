@@ -34,3 +34,7 @@
 ## 2026-11-10 - Destructive Action Guard and Live Region Cancellation Feedback
 **Learning:** Destructive card actions (such as 'Undo applied') that immediately trigger server deletion upon click risk accidental state loss during browsing; additionally, aborting a prompt leaves keyboard and screen reader users without feedback regarding whether their action was executed or cancelled.
 **Action:** Prompt for confirmation on destructive card removals displaying the specific item context, and announce prompt cancellations to polite live status regions (`role="status"` / `aria-live="polite"`).
+
+## 2026-11-11 - Explicit Disclosure State and Controlled Target Relationships
+**Learning:** Relying on default browser `<details>` and `<summary>` announcements often fails across varied screen readers, which do not consistently communicate the expanded/collapsed state or the controlled target relationship when traversing card listings.
+**Action:** Explicitly attach `aria-controls` referencing the unique description container ID and synchronize `aria-expanded` via the `'toggle'` event listener on `<details>` disclosure widgets.
