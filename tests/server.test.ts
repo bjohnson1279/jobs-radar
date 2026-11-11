@@ -308,6 +308,11 @@ test('server endpoints, security headers, validation, and static files', async (
     assert.equal(pathHostRes.status, 400);
     assert.deepEqual(pathHostRes.body, { error: 'Invalid Host header' });
 
+    // Rejects host headers causing URL parse errors (e.g. invalid port number > 65535) with 400 Bad Request
+    const invalidPortHostRes = await requestWithHost('localhost:999999');
+    assert.equal(invalidPortHostRes.status, 400);
+    assert.deepEqual(invalidPortHostRes.body, { error: 'Invalid Host header' });
+
     // Accepts valid local host headers
     const validLocalhostRes = await requestWithHost(`localhost:${testPort}`, '/api/health');
     assert.equal(validLocalhostRes.status, 200);
@@ -316,4 +321,46 @@ test('server endpoints, security headers, validation, and static files', async (
     const validIpv6Res = await requestWithHost(`[::1]:${testPort}`, '/api/health');
     assert.equal(validIpv6Res.status, 200);
     assert.deepEqual(validIpv6Res.body, { status: 'ok' });
+
+    // Additional Edge Cases: Origin header malformations and unsupported protocols
+    const malformedOriginRes = await fetch(`${baseUrl}/api/refresh`, {
+        method: 'POST',
+        headers: { 'X-Jobs-Radar': 'refresh', 'Origin': 'not-a-valid-url' },
+    });
+    assert.equal(malformedOriginRes.status, 403);
+    assert.deepEqual(await malformedOriginRes.json(), { error: 'Invalid Origin header' });
+
+    const unsupportedProtocolOriginRes = await fetch(`${baseUrl}/api/refresh`, {
+        method: 'POST',
+        headers: { 'X-Jobs-Radar': 'refresh', 'Origin': `ftp://127.0.0.1:${testPort}` },
+    });
+    assert.equal(unsupportedProtocolOriginRes.status, 403);
+    assert.deepEqual(await unsupportedProtocolOriginRes.json(), { error: 'Invalid Origin header' });
+
+    // Additional Edge Cases: POST /api/application default timestamp and applied:false with invalid appliedAt
+    const appDefaultDateRes = await fetch(`${baseUrl}/api/application`, {
+        method: 'POST',
+        headers: { 'X-Jobs-Radar': 'application', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: 'gh-acme-101', applied: true }),
+    });
+    assert.equal(appDefaultDateRes.status, 200);
+    assert.deepEqual(await appDefaultDateRes.json(), { saved: true });
+
+    // When applied: false, invalid appliedAt is safely ignored and status cleared
+    const appClearWithInvalidDateRes = await fetch(`${baseUrl}/api/application`, {
+        method: 'POST',
+        headers: { 'X-Jobs-Radar': 'application', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: 'gh-acme-101', applied: false, appliedAt: 'invalid-date' }),
+    });
+    assert.equal(appClearWithInvalidDateRes.status, 200);
+    assert.deepEqual(await appClearWithInvalidDateRes.json(), { saved: true });
+
+    // Method and endpoint edge cases: unsupported methods return 404
+    const getRefreshRes = await fetch(`${baseUrl}/api/refresh`);
+    assert.equal(getRefreshRes.status, 404);
+    assert.deepEqual(await getRefreshRes.json(), { error: 'Not found' });
+
+    const deleteJobsRes = await fetch(`${baseUrl}/api/jobs`, { method: 'DELETE' });
+    assert.equal(deleteJobsRes.status, 404);
+    assert.deepEqual(await deleteJobsRes.json(), { error: 'Not found' });
 });
