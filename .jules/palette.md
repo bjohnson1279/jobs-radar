@@ -38,3 +38,9 @@
 ## 2026-11-11 - Explicit Disclosure State and Controlled Target Relationships
 **Learning:** Relying on default browser `<details>` and `<summary>` announcements often fails across varied screen readers, which do not consistently communicate the expanded/collapsed state or the controlled target relationship when traversing card listings.
 **Action:** Explicitly attach `aria-controls` referencing the unique description container ID and synchronize `aria-expanded` via the `'toggle'` event listener on `<details>` disclosure widgets.
+
+**Action:** Prompt for confirmation on destructive card removals displaying the specific item context, and announce prompt cancellations to polite live status regions (`role="status"` / `aria-live="polite"`).
+
+## 2026-11-11 - Grammatical Pluralization in Dynamic Counter Live Announcements
+**Learning:** Hardcoding plural nouns in dynamic search status counters (such as '1 matches') introduces noticeable grammatical awkwardness that is prominently voiced by screen readers monitoring `role="status"` live regions on filtered results.
+**Action:** Always condition noun inflections (e.g., `count === 1 ? 'match' : 'matches'`) in status strings and live region updates to maintain natural linguistic flow.
