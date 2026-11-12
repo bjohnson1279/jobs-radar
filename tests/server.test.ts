@@ -42,6 +42,12 @@ test('server endpoints, security headers, validation, and static files', async (
     assert.equal(headers.get('content-security-policy'), "default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'none'");
     assert.equal(headers.get('permissions-policy'), 'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()');
 
+    // Method Not Allowed (405) with Allow header on GET-only /api/health
+    const healthPostRes = await fetch(`${baseUrl}/api/health`, { method: 'POST' });
+    assert.equal(healthPostRes.status, 405);
+    assert.equal(healthPostRes.headers.get('allow'), 'GET');
+    assert.deepEqual(await healthPostRes.json(), { error: 'Method Not Allowed' });
+
     // Prototype property lookup returns 404
     const protoResponse = await fetch(`${baseUrl}/toString`);
     assert.equal(protoResponse.status, 404);
@@ -56,6 +62,12 @@ test('server endpoints, security headers, validation, and static files', async (
     assert.equal(jobsJson.jobs[0].id, 'gh-acme-101');
     assert.equal(jobsJson.refreshing, false);
     assert.equal(jobsJson.error, null);
+
+    // Method Not Allowed (405) with Allow header on GET-only /api/jobs
+    const jobsPostRes = await fetch(`${baseUrl}/api/jobs`, { method: 'POST' });
+    assert.equal(jobsPostRes.status, 405);
+    assert.equal(jobsPostRes.headers.get('allow'), 'GET');
+    assert.deepEqual(await jobsPostRes.json(), { error: 'Method Not Allowed' });
 
     // 3. POST /api/refresh
     // Rejects missing or invalid header with 403
@@ -94,6 +106,12 @@ test('server endpoints, security headers, validation, and static files', async (
         headers: { 'X-Jobs-Radar': 'refresh', 'Origin': `http://127.0.0.1:${testPort}` },
     });
     assert.equal(refreshValidOriginRes.status, 202);
+
+    // Method Not Allowed (405) with Allow header on POST-only /api/refresh
+    const refreshGetRes = await fetch(`${baseUrl}/api/refresh`, { method: 'GET' });
+    assert.equal(refreshGetRes.status, 405);
+    assert.equal(refreshGetRes.headers.get('allow'), 'POST');
+    assert.deepEqual(await refreshGetRes.json(), { error: 'Method Not Allowed' });
 
     // 4. POST /api/application
     // Rejects untrusted or null origin header with 403
@@ -258,6 +276,12 @@ test('server endpoints, security headers, validation, and static files', async (
     assert.equal(appClearRes.status, 200);
     assert.deepEqual(await appClearRes.json(), { saved: true });
 
+    // Method Not Allowed (405) with Allow header on POST-only /api/application
+    const appGetRes = await fetch(`${baseUrl}/api/application`, { method: 'GET' });
+    assert.equal(appGetRes.status, 405);
+    assert.equal(appGetRes.headers.get('allow'), 'POST');
+    assert.deepEqual(await appGetRes.json(), { error: 'Method Not Allowed' });
+
     // 5. Static file serving & unknown routes
     const indexRes = await fetch(`${baseUrl}/`);
     assert.equal(indexRes.status, 200);
@@ -283,6 +307,12 @@ test('server endpoints, security headers, validation, and static files', async (
     const cssCachedRes = await fetch(`${baseUrl}/style.css`);
     assert.equal(cssCachedRes.status, 200);
     assert.ok((cssCachedRes.headers.get('content-type') ?? '').includes('text/css'));
+
+    // Method Not Allowed (405) with Allow header on static assets
+    const staticPostRes = await fetch(`${baseUrl}/app.js`, { method: 'POST' });
+    assert.equal(staticPostRes.status, 405);
+    assert.equal(staticPostRes.headers.get('allow'), 'GET');
+    assert.deepEqual(await staticPostRes.json(), { error: 'Method Not Allowed' });
 
     const notFoundRes = await fetch(`${baseUrl}/api/unknown-endpoint`);
     assert.equal(notFoundRes.status, 404);

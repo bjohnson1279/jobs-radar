@@ -87,12 +87,21 @@ export const server = createServer(async (req, res) => {
         json(400, { error: 'Bad Request' }); return;
     }
     try {
-        if (url.pathname === '/api/health' && req.method === 'GET') {
+        // Security: Strictly enforce allowed HTTP methods per route and respond with 405 Method Not Allowed
+        // and an Allow header to adhere to HTTP standards and reject unexpected HTTP verb combinations.
+        const methodNotAllowed = (allow: string) => {
+            res.setHeader('Allow', allow);
+            json(405, { error: 'Method Not Allowed' });
+        };
+        if (url.pathname === '/api/health') {
+            if (req.method !== 'GET') { methodNotAllowed('GET'); return; }
             json(200, { status: 'ok' });
-        } else if (url.pathname === '/api/jobs' && req.method === 'GET') {
+        } else if (url.pathname === '/api/jobs') {
+            if (req.method !== 'GET') { methodNotAllowed('GET'); return; }
             const saved = store.snapshot();
             json(200, { profile: { ...settings.profile, locationLabel: settings.location.label, country: settings.location.country.name, includeLocal: settings.location.includeLocal, includeRemote: settings.location.includeRemote }, jobs: rankJobs(saved.jobs), updatedAt: saved.updatedAt, refreshing: !!refresh, error });
-        } else if (url.pathname === '/api/refresh' && req.method === 'POST') {
+        } else if (url.pathname === '/api/refresh') {
+            if (req.method !== 'POST') { methodNotAllowed('POST'); return; }
             if (req.headers['x-jobs-radar'] !== 'refresh') { json(403, { error: 'Invalid refresh request' }); return; }
             if (!refresh) {
                 error = null;
@@ -101,7 +110,8 @@ export const server = createServer(async (req, res) => {
                     .finally(() => { refresh = null; });
             }
             json(202, { refreshing: true });
-        } else if (url.pathname === '/api/application' && req.method === 'POST') {
+        } else if (url.pathname === '/api/application') {
+            if (req.method !== 'POST') { methodNotAllowed('POST'); return; }
             if (req.headers['x-jobs-radar'] !== 'application') { json(403, { error: 'Invalid application request' }); return; }
             // Security: Enforce Content-Type to guard against media-type confusion and ensure JSON payload
             const contentType = req.headers['content-type']?.split(';')[0].trim().toLowerCase();
@@ -125,7 +135,8 @@ export const server = createServer(async (req, res) => {
             if (!store.has(input.id)) { json(404, { error: 'Unknown job' }); return; }
             await store.setApplied(input.id, appliedAt);
             json(200, { saved: true });
-        } else if (req.method === 'GET' && Object.hasOwn(assets, url.pathname)) {
+        } else if (Object.hasOwn(assets, url.pathname)) {
+            if (req.method !== 'GET') { methodNotAllowed('GET'); return; }
             const [file, type] = assets[url.pathname];
             let body = assetCache.get(file);
             if (!body) {
