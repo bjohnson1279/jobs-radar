@@ -45,7 +45,7 @@ function render() {
     refresh.setAttribute('aria-busy', state.refreshing ? 'true' : 'false');
     refresh.textContent = state.refreshing ? 'Searching…' : 'Search job boards';
     status.textContent = state.error || (state.refreshing ? 'Searching job boards. This can take a few minutes…'
-        : state.updatedAt ? `${jobs.length} matches · Highest score first · Updated ${new Date(state.updatedAt).toLocaleString()}`
+        : state.updatedAt ? `${jobs.length} ${jobs.length === 1 ? 'match' : 'matches'} · Highest score first · Updated ${new Date(state.updatedAt).toLocaleString()}`
             : 'No search yet. Search job boards to load current listings.');
     if (!state.updatedAt) {
         const emptyState = element('div');
@@ -155,9 +155,17 @@ function render() {
         }
         card.append(criteria);
         const details = element('details');
+        const descId = `job-desc-${job.id}`;
         const summary = element('summary', 'Job description');
         summary.setAttribute('aria-label', `Job description for ${job.title} at ${job.company}`);
-        details.append(summary, element('p', job.description || 'Description unavailable from this source.', 'description'));
+        summary.setAttribute('aria-controls', descId);
+        summary.setAttribute('aria-expanded', 'false');
+        details.addEventListener('toggle', () => {
+            summary.setAttribute('aria-expanded', details.open ? 'true' : 'false');
+        });
+        const descPara = element('p', job.description || 'Description unavailable from this source.', 'description');
+        descPara.id = descId;
+        details.append(summary, descPara);
         card.append(details);
         try {
             const url = new URL(job.url);

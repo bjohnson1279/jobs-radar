@@ -36,6 +36,15 @@ export const server = createServer(async (req, res) => {
         res.writeHead(status, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
         res.end(JSON.stringify(data));
     };
+    // Security: Enforce RFC 9112 Section 7.1 by rejecting duplicate Host headers to prevent HTTP request smuggling
+    // and DNS rebinding check bypasses where Node only exposes the first Host header in req.headers.host.
+    let hostCount = 0;
+    for (let i = 0; i < req.rawHeaders.length; i += 2) {
+        if (req.rawHeaders[i].toLowerCase() === 'host') hostCount++;
+    }
+    if (hostCount !== 1) {
+        json(400, { error: 'Invalid Host header' }); return;
+    }
     // Security: Validate Host header to protect against DNS rebinding attacks targeting local services.
     // Unrecognized or malicious host headers (e.g. from external domains resolving to 127.0.0.1) are rejected.
     const rawHost = req.headers.host;
@@ -121,7 +130,9 @@ export const server = createServer(async (req, res) => {
             if (input.applied && (!appliedAt || Date.parse(appliedAt) > Date.now())) {
                 json(400, { error: 'Application date must be valid and not in the future' }); return;
             }
-            if (!store.snapshot().jobs.some(job => job.id === input.id)) { json(404, { error: 'Unknown job' }); return; }
+            // Performance optimization: Use O(1) indexed lookup instead of cloning store via store.snapshot()
+            // and running an O(N) linear array scan.
+            if (!store.has(input.id)) { json(404, { error: 'Unknown job' }); return; }
             await store.setApplied(input.id, appliedAt);
             json(200, { saved: true });
         } else if (Object.hasOwn(assets, url.pathname)) {
