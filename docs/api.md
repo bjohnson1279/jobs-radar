@@ -282,7 +282,7 @@ Requested by web browsers when accessing the application UI at the root server a
 In addition to endpoint-specific errors, the HTTP server returns standardized JSON error payloads for unrecognized routes, malformed requests, or unhandled exceptions:
 
 ### Malformed Request Target or Invalid Host (`400 Bad Request`)
-Returned when an incoming request target is not in valid origin-form (e.g. malformed URIs, proxy-style paths with hostnames, protocol-relative URIs starting with `//`, or paths containing backslashes `\`) or when the `Host` header is missing or malformed.
+Returned when an incoming request target is not in valid origin-form (e.g. malformed URIs, proxy-style paths with hostnames, protocol-relative URIs starting with `//`, or paths containing backslashes `\`), when the `Host` header is missing, malformed, or contains invalid characters, or when duplicate `Host` headers are supplied (RFC 9112 Section 7.1).
 
 - **Status Code**: `400 Bad Request`
 - **Body Schema**:
