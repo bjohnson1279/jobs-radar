@@ -155,9 +155,17 @@ function render() {
         }
         card.append(criteria);
         const details = element('details');
+        const descId = `job-desc-${job.id}`;
         const summary = element('summary', 'Job description');
         summary.setAttribute('aria-label', `Job description for ${job.title} at ${job.company}`);
-        details.append(summary, element('p', job.description || 'Description unavailable from this source.', 'description'));
+        summary.setAttribute('aria-controls', descId);
+        summary.setAttribute('aria-expanded', 'false');
+        details.addEventListener('toggle', () => {
+            summary.setAttribute('aria-expanded', details.open ? 'true' : 'false');
+        });
+        const descPara = element('p', job.description || 'Description unavailable from this source.', 'description');
+        descPara.id = descId;
+        details.append(summary, descPara);
         card.append(details);
         try {
             const url = new URL(job.url);
