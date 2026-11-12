@@ -316,4 +316,32 @@ test('server endpoints, security headers, validation, and static files', async (
     const validIpv6Res = await requestWithHost(`[::1]:${testPort}`, '/api/health');
     assert.equal(validIpv6Res.status, 200);
     assert.deepEqual(validIpv6Res.body, { status: 'ok' });
+
+    // Rejects duplicate Host headers with 400 Bad Request (RFC 9112 Section 7.1)
+    const duplicateHostStatus = await new Promise<{ status: number; body: any }>((resolve, reject) => {
+        import('node:net').then(({ default: netModule }) => {
+            const socket = netModule.connect(testPort, '127.0.0.1', () => {
+                socket.write(`GET /api/jobs HTTP/1.1\r\nHost: localhost:${testPort}\r\nHost: attacker.com\r\n\r\n`);
+            });
+            let raw = '';
+            socket.on('data', chunk => { raw += chunk; });
+            socket.on('end', () => {
+                const statusLine = raw.split('\r\n')[0];
+                const statusCode = Number(statusLine.split(' ')[1]);
+                const bodyStr = raw.split('\r\n\r\n')[1] || '';
+                let body: any;
+                try {
+                    const parsedLength = parseInt(bodyStr, 16);
+                    const unchunked = isNaN(parsedLength) ? bodyStr : bodyStr.split('\r\n')[1] || bodyStr;
+                    body = JSON.parse(unchunked);
+                } catch {
+                    body = bodyStr;
+                }
+                resolve({ status: statusCode, body });
+            });
+            socket.on('error', reject);
+        });
+    });
+    assert.equal(duplicateHostStatus.status, 400);
+    assert.deepEqual(duplicateHostStatus.body, { error: 'Invalid Host header' });
 });
