@@ -162,12 +162,58 @@ test('server endpoints, security headers, validation, and static files', async (
     assert.equal(appMissingIdRes.status, 400);
     assert.equal((await appMissingIdRes.json()).error, 'id and applied are required');
 
+    // Rejects non-object parsed JSON payloads (arrays, primitives, null) with 400
+    const appArrayBodyRes = await fetch(`${baseUrl}/api/application`, {
+        method: 'POST',
+        headers: { 'X-Jobs-Radar': 'application', 'Content-Type': 'application/json' },
+        body: JSON.stringify([{ id: 'gh-acme-101', applied: true }]),
+    });
+    assert.equal(appArrayBodyRes.status, 400);
+    assert.equal((await appArrayBodyRes.json()).error, 'id and applied are required');
+
+    const appPrimitiveBodyRes = await fetch(`${baseUrl}/api/application`, {
+        method: 'POST',
+        headers: { 'X-Jobs-Radar': 'application', 'Content-Type': 'application/json' },
+        body: JSON.stringify(12345),
+    });
+    assert.equal(appPrimitiveBodyRes.status, 400);
+    assert.equal((await appPrimitiveBodyRes.json()).error, 'id and applied are required');
+
+    const appNullBodyRes = await fetch(`${baseUrl}/api/application`, {
+        method: 'POST',
+        headers: { 'X-Jobs-Radar': 'application', 'Content-Type': 'application/json' },
+        body: JSON.stringify(null),
+    });
+    assert.equal(appNullBodyRes.status, 400);
+    assert.equal((await appNullBodyRes.json()).error, 'id and applied are required');
+
+    // Rejects unsupported Origin protocol (e.g. ftp://) on mutating endpoints with 403
+    const appFtpOriginRes = await fetch(`${baseUrl}/api/application`, {
+        method: 'POST',
+        headers: {
+            'X-Jobs-Radar': 'application',
+            'Content-Type': 'application/json',
+            'Origin': 'ftp://127.0.0.1',
+        },
+        body: JSON.stringify({ id: 'gh-acme-101', applied: true }),
+    });
+    assert.equal(appFtpOriginRes.status, 403);
+    assert.deepEqual(await appFtpOriginRes.json(), { error: 'Invalid Origin header' });
+
+    // Rejects non-boolean applied values (strings, numbers, null)
     const appNonBoolAppliedRes = await fetch(`${baseUrl}/api/application`, {
         method: 'POST',
         headers: { 'X-Jobs-Radar': 'application', 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: 'gh-acme-101', applied: 'true' }),
     });
     assert.equal(appNonBoolAppliedRes.status, 400);
+
+    const appNumericAppliedRes = await fetch(`${baseUrl}/api/application`, {
+        method: 'POST',
+        headers: { 'X-Jobs-Radar': 'application', 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: 'gh-acme-101', applied: 1 }),
+    });
+    assert.equal(appNumericAppliedRes.status, 400);
 
     // Rejects future or invalid appliedAt timestamp with 400
     const appFutureDateRes = await fetch(`${baseUrl}/api/application`, {
@@ -217,13 +263,26 @@ test('server endpoints, security headers, validation, and static files', async (
     assert.equal(indexRes.status, 200);
     assert.ok((indexRes.headers.get('content-type') ?? '').includes('text/html'));
 
+    // Re-request static files to exercise assetCache hit paths
+    const indexCachedRes = await fetch(`${baseUrl}/`);
+    assert.equal(indexCachedRes.status, 200);
+    assert.ok((indexCachedRes.headers.get('content-type') ?? '').includes('text/html'));
+
     const jsRes = await fetch(`${baseUrl}/app.js`);
     assert.equal(jsRes.status, 200);
     assert.ok((jsRes.headers.get('content-type') ?? '').includes('text/javascript'));
 
+    const jsCachedRes = await fetch(`${baseUrl}/app.js`);
+    assert.equal(jsCachedRes.status, 200);
+    assert.ok((jsCachedRes.headers.get('content-type') ?? '').includes('text/javascript'));
+
     const cssRes = await fetch(`${baseUrl}/style.css`);
     assert.equal(cssRes.status, 200);
     assert.ok((cssRes.headers.get('content-type') ?? '').includes('text/css'));
+
+    const cssCachedRes = await fetch(`${baseUrl}/style.css`);
+    assert.equal(cssCachedRes.status, 200);
+    assert.ok((cssCachedRes.headers.get('content-type') ?? '').includes('text/css'));
 
     const notFoundRes = await fetch(`${baseUrl}/api/unknown-endpoint`);
     assert.equal(notFoundRes.status, 404);
