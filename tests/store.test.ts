@@ -18,12 +18,17 @@ test('history and applications survive refresh, disappearance, and restart', asy
     try {
         const path = join(directory, 'jobs.json');
         let store = await openStore(path);
+        assert.equal(store.has(job.id), false);
         await store.recordSearch([job], '2026-10-01T00:00:00.000Z');
+        assert.equal(store.has(job.id), true);
+        assert.equal(store.has('non-existent-id'), false);
         await Promise.all([
             store.setApplied(job.id, '2026-10-02T00:00:00.000Z'),
             store.recordSearch([{ ...job, postedAt: null }], '2026-10-03T00:00:00.000Z'),
         ]);
         store = await openStore(path);
+        assert.equal(store.has(job.id), true);
+        assert.equal(store.has('gh-example-2'), false);
         let saved = store.snapshot().jobs[0];
         assert.equal(saved.firstSeenAt, '2026-10-01T00:00:00.000Z');
         assert.equal(saved.lastSeenAt, '2026-10-03T00:00:00.000Z');
